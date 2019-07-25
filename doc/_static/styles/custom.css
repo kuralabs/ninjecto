@@ -1,0 +1,118 @@
+@import url(https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans);
+
+/* Improve autodoc */
+
+/* Show reference in a box */
+dl.class,
+dl.method,
+dl.function,
+dl.exception,
+dl.data {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    padding: 1em 1em 0 1em;
+}
+
+dl.class em,
+dl.method em,
+dl.function em,
+dl.exception em,
+dl.data em {
+    font-style: normal;
+}
+
+dl.method {
+    border-bottom: none;
+}
+
+/* Extend reference heads to the width */
+dl.class dt,
+dl.method dt,
+dl.function dt,
+dl.exception dt,
+dl.data dt {
+    width: 100% !important;
+}
+
+/* Improve box spacing */
+dl.class dd,
+dl.method dd,
+dl.function dd,
+dl.exception dd,
+dl.data dd {
+    /* margin: 0 !important;
+    padding: 15px !important; */
+}
+
+/* Remove namespace in reference, we know where we are thank you */
+dl.class dt code.descclassname,
+dl.method dt code.descclassname,
+dl.function dt code.descclassname,
+dl.exception dt code.descclassname,
+dl.data dt code.descclassname {
+    display: none !important;
+}
+
+/* Make images responsive */
+.container-wrapper img {
+    max-width: 100%;
+}
+
+/* PlantUML SVGs */
+object[type="image/svg+xml"] {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Guzzle theme fixes */
+.container.float-right {
+    float: right;
+    width: initial;
+}
+
+.section h1 code {
+    font-size: 1em;
+}
+
+
+/* Guzzle theme overrides */
+
+body {
+    font-family: 'Fira Sans','Open Sans',sans-serif;
+    background-color: #ffffff;
+    color: #3a4145;
+}
+
+p {
+    color: #3a4145;
+    font-size: 1.1em;
+    line-height: 1.8em;
+}
+
+a, a:hover, a:focus {
+    text-decoration: none;
+    color: #57a3e8;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #3a4145;
+    text-rendering: optimizeLegibility;
+    line-height: 1em;
+    font-family: 'Fira Sans','Open Sans',sans-serif;
+}
+
+li {
+    line-height: 1.9em;
+}
+
+dl dd {
+    line-height: 1.8em;
+}
+
+#right-column {
+    border-right: 1px solid #e0e0e0;
+}
+
+.footer {
+    border-right: 1px solid #e0e0e0;
+}

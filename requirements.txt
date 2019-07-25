@@ -1,0 +1,24 @@
+# Purpose:
+#
+#   This requirements file list public Python packages that are mandatory
+#   runtime dependencies.
+
+#######################
+# Input formats       #
+#######################
+
+toml
+ujson
+pyyaml
+
+#######################
+# Core functionality  #
+#######################
+
+jinja2
+
+#######################
+# Utilities           #
+#######################
+
+colorlog

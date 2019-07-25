@@ -1,0 +1,23 @@
+{% extends "!layout.html" %}
+{%- block extrahead %}
+
+    <!-- Open Graph data - Facebook -->
+    <meta property="og:title" content="Ninjecto - Ninja Injection Tool" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://docs.kuralabs.io/ninjecto/ninjecto.svg" />
+    <meta property="og:url" content="https://docs.kuralabs.io/ninjecto/" />
+    <meta property="og:description" content="Template rendering and variable injection made easy." />
+
+    <!-- Twitter Summary Card with Large Image -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@kuralabs" />
+    <meta name="twitter:creator" content="@kuralabs" />
+    <meta name="twitter:title" content="Ninjecto - Ninja Injection Tool" />
+    <meta name="twitter:image" content="https://docs.kuralabs.io/ninjecto/ninjecto.svg" />
+    <meta name="twitter:description" content="Template rendering and variable injection made easy." />
+
+    <!-- Google Search -->
+    <meta name="description" content="Template rendering and variable injection made easy." />
+
+{{ super() }}
+{%- endblock %}
