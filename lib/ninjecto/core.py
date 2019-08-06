@@ -16,5 +16,26 @@
 # under the License.
 
 """
-ninjecto.plugins module entry point.
+Core module.
 """
+
+from logging import getLogger
+
+
+log = getLogger(__name__)
+
+
+class Ninjecto:
+    def __init__(self, values, source, destination):
+        self._values = values
+        self._source = source
+        self._destination = destination
+
+    def run(self, dry_run, override):
+        log.info('{} -> {}'.format(self._source, self._destination))
+        log.info('with:\n{}'.format(self._values))
+
+
+__all__ = [
+    'Ninjecto',
+]

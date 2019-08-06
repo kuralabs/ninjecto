@@ -22,3 +22,5 @@ jinja2
 #######################
 
 colorlog
+pprintpp
+setproctitle

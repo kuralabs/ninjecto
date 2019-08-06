@@ -16,5 +16,5 @@
 # under the License.
 
 """
-ninjecto.plugins module entry point.
+ninjecto.utils module entry point.
 """
