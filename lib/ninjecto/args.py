@@ -133,6 +133,17 @@ def validate_args(args):
 
     log.debug('Arguments:\n{}'.format(args))
 
+    # Check if configuration exists
+    if args.config:
+        args.config = Path(args.config)
+
+        if not args.config.is_file():
+            raise InvalidArguments(
+                'No such configuration file {}'.format(args.config)
+            )
+
+        args.config = args.config.resolve()
+
     # Check if input exists
     args.input = Path(args.input)
 
@@ -234,6 +245,16 @@ def parse_args(argv=None):
         dest='colorize',
         action='store_false',
         help='Do not colorize the log output'
+    )
+
+    # Configuration
+    parser.add_argument(
+        '-c', '--config',
+        dest='config',
+        help=(
+            'Ninjecto and plugins configuration file. '
+            'Must be a .toml, .yaml or .json'
+        ),
     )
 
     # Dry run
