@@ -341,10 +341,14 @@ setup(
         'console_scripts': [
             'ninjecto = ninjecto.__main__:main',
         ],
-        'ninjecto_plugin_filters_1_0': [
-            'comment = ninjecto.plugins.filters.comment:comment',
-            'quote = ninjecto.plugins.filters.quote:quote',
-            'read = ninjecto.plugins.filters.read:read',
+        'ninjecto_plugins_filters_1_0': [
+            # 'comment = ninjecto.plugins.filters.comment:comment',
+            # 'quote = ninjecto.plugins.filters.quote:quote',
+            # 'read = ninjecto.plugins.filters.read:read',
+        ],
+        'ninjecto_plugins_namespaces_1_0': [
+            'env = ninjecto.plugins.namespaces.env:namespace_env',
+            'git = ninjecto.plugins.namespaces.git:namespace_git',
         ],
     },
 

@@ -39,13 +39,11 @@ log = getLogger(__name__)
 COLOR_FORMAT = (
     '  {thin_white}{asctime}{reset} | '
     '{log_color}{levelname:8}{reset} | '
-    '{thin_white}{processName}{reset} | '
     '{log_color}{message}{reset}'
 )
 SIMPLE_FORMAT = (
     '  {asctime} | '
     '{levelname:8} | '
-    '{processName} | '
     '{message}'
 )
 LEVELS = {
@@ -312,4 +310,6 @@ def parse_args(argv=None):
     return args
 
 
-__all__ = ['parse_args']
+__all__ = [
+    'parse_args',
+]

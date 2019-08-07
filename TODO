@@ -1,5 +1,2 @@
-- Load local module to locally register plugins.
-- Environments (as plugins)
-- Configuration file loading for ninjecto and plugins
 - Dry run
 - Nice progression

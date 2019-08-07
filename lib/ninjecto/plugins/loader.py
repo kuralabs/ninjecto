@@ -44,10 +44,14 @@ class FunctionLoader(object):
     def __init__(self, package, component, api_version='1.0'):
         super().__init__()
 
-        self.entrypoint = '{package}_plugin_{component}_{api_version}'.format(
-            package=package,
-            component=component,
-            api_version=api_version.replace('.', '_'),
+        self._package = package
+        self._component = component
+        self._api_version = api_version
+
+        self.entrypoint = '{package}_plugins_{component}_{api_version}'.format(
+            package=self._package,
+            component=self._component,
+            api_version=self._api_version.replace('.', '_'),
         )
 
         self._functions_cache = OrderedDict()
@@ -63,16 +67,6 @@ class FunctionLoader(object):
         This method is expected to be used as a decorator. It allows to
         register a function locally without having to create a full Python
         package to use entrypoints.
-
-        Usage:
-
-        ::
-
-            from flowbber.loaders import filter
-
-            @filter.register('my_filter')
-            def my_filter(arg1):
-                return arg1
         """
 
         def decorator(function):
@@ -87,6 +81,23 @@ class FunctionLoader(object):
             return function
 
         return decorator
+
+    @classmethod
+    def unregister(cls, key):
+        """
+        Unregister a previously registered function.
+        """
+        if cls._locally_registered:
+            del cls._locally_registered[key]
+
+    @classmethod
+    def reset(cls):
+        """
+        Reset locally registered functions.
+        """
+        if cls._locally_registered is None:
+            cls._locally_registered = OrderedDict()
+        cls._locally_registered.clear()
 
     def load_functions(self, cache=True):
         """
@@ -123,7 +134,7 @@ class FunctionLoader(object):
                 function = ep.load()
             except Exception:
                 log.exception(
-                    'Unable to load function {}'.format(name)
+                    'Unable to load function "{}"'.format(name)
                 )
                 continue
 
@@ -136,6 +147,11 @@ class FunctionLoader(object):
                 continue
 
             available[name] = function
+            log.debug(
+                'Successfully loaded "{}" function {}'.format(
+                    self._component, name,
+                )
+            )
 
         # Load locally registered
         available.update(

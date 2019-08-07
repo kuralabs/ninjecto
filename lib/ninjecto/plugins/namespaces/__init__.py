@@ -16,11 +16,7 @@
 # under the License.
 
 """
-Class to load filter plugins.
-
-This class bridges Jinja's filters with Ninjecto:
-
-    http://jinja.pocoo.org/docs/2.10/api/#custom-filters
+Class to load namespaces plugins.
 """
 
 from functools import wraps
@@ -32,22 +28,22 @@ from ..loader import FunctionLoader
 log = getLogger(__name__)
 
 
-class FiltersLoader(FunctionLoader):
+class NamespacesLoader(FunctionLoader):
     """
-    Filters plugins loader class.
+    Namespaces plugins loader class.
     """
 
     def __init__(self):
-        super().__init__('ninjecto', 'filters')
+        super().__init__('ninjecto', 'namespaces')
 
 
-FiltersLoader.reset()
+NamespacesLoader.reset()
 
 
-@wraps(FiltersLoader.register)
+@wraps(NamespacesLoader.register)
 def register(key):
     """
-    Register a filter plugin.
+    Register a namespace plugin.
 
     This function can be used as decorator:
 
@@ -55,16 +51,16 @@ def register(key):
 
     ::
 
-        from ninjecto.plugins import filters
+        from ninjecto.plugins import namespaces
 
-        @filters.register('my_filter')
-        def my_filter(arg1):
-            return arg1
+        @namespaces.register('my_namespace')
+        def my_namespace(config, root):
+            return {'hello': 'world'}
     """
-    return FiltersLoader.register(key)
+    return NamespacesLoader.register(key)
 
 
 __all__ = [
-    'FiltersLoader',
+    'NamespacesLoader',
     'register',
 ]

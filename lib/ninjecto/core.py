@@ -21,6 +21,10 @@ Core module.
 
 from logging import getLogger
 
+from .local import load_local
+from .plugins.filters import FiltersLoader
+from .plugins.namespaces import NamespacesLoader
+
 
 log = getLogger(__name__)
 
@@ -31,7 +35,13 @@ class Ninjecto:
         self._source = source
         self._destination = destination
 
+        self._local = load_local(self._source.parent)
+        self._filters = FiltersLoader()
+        self._namespaces = NamespacesLoader()
+
     def run(self, dry_run, override):
+        self._filters.load_functions()
+        self._namespaces.load_functions()
         log.info('{} -> {}'.format(self._source, self._destination))
         log.info('with:\n{}'.format(self._values))
 

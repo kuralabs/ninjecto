@@ -16,36 +16,17 @@
 # under the License.
 
 """
-Executable module entry point.
+Schema for the pipeline definition data structure.
 """
 
-from .core import Ninjecto
-from .values import load_values
+from logging import getLogger
 
 
-def main():
-    from setproctitle import setproctitle
-    setproctitle('ninjecto')
-
-    # Parse arguments
-    from .args import InvalidArguments, parse_args
-    try:
-        args = parse_args()
-    except InvalidArguments:
-        exit(1)
-
-    # Load values
-    values = load_values(args.values_files, args.values)
-
-    # Execute engine
-    ninjecto = Ninjecto(values, args.input, args.output)
-    ninjecto.run(args.dry_run, args.override)
-
-    exit(0)
+log = getLogger(__name__)
 
 
-if __name__ == '__main__':
-    main()
+SLUG_REGEX = r'^[a-zA-Z][a-zA-Z0-9_]*$'
 
 
-__all__ = []
+__all__ = [
+]
