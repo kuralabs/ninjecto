@@ -21,6 +21,8 @@ Core module.
 
 from logging import getLogger
 
+from pprintpp import pformat
+
 from .local import load_local
 from .plugins.filters import FiltersLoader
 from .plugins.namespaces import NamespacesLoader
@@ -30,20 +32,27 @@ log = getLogger(__name__)
 
 
 class Ninjecto:
-    def __init__(self, values, source, destination):
+    def __init__(self, config, values, libraries, source, destination):
+        self._config = config
         self._values = values
+        self._libraries = libraries
         self._source = source
         self._destination = destination
 
+        # Reload local plugins
+        FiltersLoader.reset()
+        NamespacesLoader.reset()
+
         self._local = load_local(self._source.parent)
-        self._filters = FiltersLoader()
-        self._namespaces = NamespacesLoader()
+        self._filters = FiltersLoader().load_functions(cache=False)
+        self._namespaces = NamespacesLoader().load_functions(cache=False)
 
     def run(self, dry_run, override):
-        self._filters.load_functions()
-        self._namespaces.load_functions()
+
         log.info('{} -> {}'.format(self._source, self._destination))
         log.info('with:\n{}'.format(self._values))
+        log.info('Using filters:\n{}'.format(pformat(self._filters)))
+        log.info('Using namespaces:\n{}'.format(pformat(self._namespaces)))
 
 
 __all__ = [

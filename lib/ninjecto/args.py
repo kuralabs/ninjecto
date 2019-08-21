@@ -131,17 +131,6 @@ def validate_args(args):
 
     log.debug('Arguments:\n{}'.format(args))
 
-    # Check if configuration exists
-    if args.config:
-        args.config = Path(args.config)
-
-        if not args.config.is_file():
-            raise InvalidArguments(
-                'No such configuration file {}'.format(args.config)
-            )
-
-        args.config = args.config.resolve()
-
     # Check if input exists
     args.input = Path(args.input)
 
@@ -163,27 +152,56 @@ def validate_args(args):
 
     args.output = args.output.resolve()
 
-    # Check values files
-    if args.values_files:
-        args.values_files = [
-            Path(values_file)
-            for values_file in args.values_files
+    # Check if files and directories exists
+    for human, argsattr, checker in [
+        ('configurations', 'configs', lambda path: path.is_file()),
+        ('libraries', 'libraries', lambda path: path.is_dir()),
+        ('values files', 'values_files', lambda path: path.is_file()),
+    ]:
+        assert hasattr(args, argsattr)
+        files = getattr(args, argsattr)
+        if not files:
+            continue
+
+        files = [
+            Path(file)
+            for file in files
         ]
 
+        # Check if exists
         missing = [
-            values_file
-            for values_file in args.values_files
-            if not values_file.is_file()
+            file
+            for file in files
+            if not file.exists()
         ]
         if missing:
             raise InvalidArguments(
-                'No such files {}'.format(', '.join(map(str, missing)))
+                'No such {} {}'.format(
+                    human,
+                    ', '.join(map(str, missing)),
+                )
             )
 
-        args.values_files = [
-            values_file.resolve()
-            for values_file in args.values_files
+        # Check if valid
+        invalid = [
+            file
+            for file in files
+            if not checker(file)
         ]
+        if invalid:
+            raise InvalidArguments(
+                'Invalid {} {}'.format(
+                    human,
+                    ', '.join(map(str, invalid)),
+                )
+            )
+
+        files = [
+            file.resolve()
+            for file in files
+        ]
+
+        setattr(args, argsattr, files)
 
     # Check values options
     if args.values:
@@ -225,10 +243,10 @@ def parse_args(argv=None):
     # Standard options
     parser.add_argument(
         '-v', '--verbose',
-        help='Increase verbosity level',
+        action='count',
         dest='verbosity',
         default=0,
-        action='count'
+        help='Increase verbosity level',
     )
     parser.add_argument(
         '--version',
@@ -240,18 +258,35 @@ def parse_args(argv=None):
     )
     parser.add_argument(
         '--no-color',
-        dest='colorize',
         action='store_false',
+        dest='colorize',
         help='Do not colorize the log output'
     )
 
     # Configuration
     parser.add_argument(
         '-c', '--config',
-        dest='config',
+        action='append',
+        dest='configs',
+        default=[],
         help=(
-            'Ninjecto and plugins configuration file. '
-            'Must be a .toml, .yaml or .json'
+            'Ninjecto and plugins configuration files. '
+            'Must be a .toml, .yaml or .json. '
+            'All files are parsed and merged left to right.'
+        ),
+    )
+
+    # Templates libraries
+    parser.add_argument(
+        '-l', '--library',
+        action='append',
+        dest='libraries',
+        default=[],
+        help=(
+            'One or more paths to directories with a templates library. '
+            'A library allows to inherit, import and other advanced '
+            'templating features. All path are made available, load priority '
+            'is left to right.'
         ),
     )
 
@@ -259,8 +294,8 @@ def parse_args(argv=None):
     parser.add_argument(
         '-d', '--dry-run',
         help='Dry run the pipeline',
+        action='store_true',
         default=False,
-        action='store_true'
     )
 
     # Values
@@ -273,8 +308,9 @@ def parse_args(argv=None):
     )
     parser.add_argument(
         '-f', '--values-file',
-        dest='values_files',
         action='append',
+        dest='values_files',
+        default=[],
         metavar='VALUES_FILE',
         help=(
             'One or more paths to files with values to render inputs with. '

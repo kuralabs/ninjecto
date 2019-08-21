@@ -19,8 +19,14 @@
 Executable module entry point.
 """
 
+from logging import getLogger
+
 from .core import Ninjecto
+from .inputs import load_files
 from .values import load_values
+
+
+log = getLogger(__name__)
 
 
 def main():
@@ -34,11 +40,22 @@ def main():
     except InvalidArguments:
         exit(1)
 
+    # Load config
+    if args.configs:
+        log.info('Loading configuration files ...')
+    config = load_files(args.configs)
+
     # Load values
+    if args.values_files:
+        log.info('Loading values files ...')
     values = load_values(args.values_files, args.values)
 
     # Execute engine
-    ninjecto = Ninjecto(values, args.input, args.output)
+    ninjecto = Ninjecto(
+        config, values,
+        args.libraries,
+        args.input, args.output,
+    )
     ninjecto.run(args.dry_run, args.override)
 
     exit(0)

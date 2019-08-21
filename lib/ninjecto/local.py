@@ -20,6 +20,7 @@ Module implementing the load of local ninjeconf.py files.
 """
 
 import sys
+from pathlib import Path
 from logging import getLogger
 from importlib import import_module
 
@@ -41,6 +42,8 @@ def load_local(rootpath):
     :return: The ninjeconf module loaded.
     :rtype: module
     """
+
+    # Check the module exists
     ninjeconf = rootpath / 'ninjeconf.py'
 
     if not ninjeconf.is_file():
@@ -49,14 +52,23 @@ def load_local(rootpath):
 
     import_path = str(rootpath.resolve())
 
+    # Remove previous module if exists
     global PREVIOUS
     if PREVIOUS is not None:
         del sys.modules['ninjeconf']
         sys.path.remove(PREVIOUS)
 
+    # Import module
     sys.path.append(import_path)
     module = import_module('ninjeconf')
     PREVIOUS = import_path
+
+    # Check the right module was loaded
+    if Path(module.__file__) != ninjeconf:
+        raise RuntimeError('Wrong ninjeconf.py module loaded! {} != {}'.format(
+            Path(module.__file__).resolve(),
+            ninjeconf.resolve(),
+        ))
 
     log.info(
         'Local ninjeconf.py successfully loaded from {}'.format(import_path)

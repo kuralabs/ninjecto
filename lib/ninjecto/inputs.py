@@ -21,6 +21,10 @@ Supported input formats module.
 
 from logging import getLogger
 
+from pprintpp import pformat
+
+from .utils.dictionary import update
+
 
 log = getLogger(__name__)
 
@@ -95,6 +99,47 @@ load_file.supported_formats = {
 }
 
 
+def load_files(paths):
+    """
+    Recursively load a list of paths and merge their content left to right.
+
+    That is, last to load will override last.
+
+    :param list paths: List of Path objects pointing to files to load.
+
+    :return: Merged content of all files.
+    :rtype: dict
+    """
+
+    bundle = {}
+
+    # Load files
+    # The returned dict of a parsed file cannot be guaranteed consistently
+    # ordered, so sadly here we loose sequentially of declaration in files.
+    for file in paths:
+
+        log.info(
+            'Loading file {} ...'.format(file)
+        )
+
+        content = load_file(file)
+
+        log.debug(
+            'Content loaded:\n{}'.format(pformat(content))
+        )
+
+        # Update the general bundle
+        update(bundle, content)
+
+    if bundle:
+        log.debug(
+            'Final bundle:\n{}'.format(pformat(bundle))
+        )
+
+    return bundle
+
+
 __all__ = [
     'load_file',
+    'load_files',
 ]

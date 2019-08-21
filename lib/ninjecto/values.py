@@ -20,11 +20,11 @@ Values loading and merging module.
 """
 
 from logging import getLogger
-from collections import Mapping
 
 from pprintpp import pformat
 
-from .inputs import load_file
+from .inputs import load_files
+from .utils.dictionary import update
 
 
 log = getLogger(__name__)
@@ -88,30 +88,6 @@ def expand_dotdict(dotdict):
     return result
 
 
-def update(to_update, update_with):
-    """
-    Recursively update a dictionary with another.
-
-    :param dict to_update: Dictionary to update.
-    :param dict update_with: Dictionary to update with.
-
-    :return: The first dictionary recursively updated by the second.
-    :rtype: dict
-    """
-    for key, value in update_with.items():
-
-        if not isinstance(value, Mapping):
-            to_update[key] = value
-            continue
-
-        to_update[key] = update(
-            to_update.get(key, type(value)()),
-            value,
-        )
-
-    return to_update
-
-
 def load_values(values_files, values):
     """
     :param list values_files: List of Path objects pointing to files with
@@ -123,27 +99,7 @@ def load_values(values_files, values):
      values dictionary, if any.
     :rtype: dict
     """
-
-    bundle = {}
-
-    # Load files
-    # The returned dict of a parsed file cannot be guaranteed consistently
-    # ordered, so sadly here we loose sequentially of declaration in files.
-    if values_files:
-        for values_file in values_files:
-
-            log.info(
-                'Loading values file {} ...'.format(values_file)
-            )
-
-            content = load_file(values_file)
-
-            log.debug(
-                'Values loaded:\n{}'.format(pformat(content))
-            )
-
-            # Update the general bundle
-            update(bundle, content)
+    bundle = load_files(values_files)
 
     if values:
         log.debug(
@@ -156,9 +112,10 @@ def load_values(values_files, values):
         )
         update(bundle, expanded)
 
-    log.debug(
-        'Final values bundle:\n{}'.format(pformat(bundle))
-    )
+    if bundle:
+        log.debug(
+            'Final values bundle:\n{}'.format(pformat(bundle))
+        )
     return bundle
 
 
