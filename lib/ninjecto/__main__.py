@@ -19,6 +19,8 @@
 Executable module entry point.
 """
 
+from os import walk
+from pathlib import Path
 from logging import getLogger
 
 from .core import Ninjecto
@@ -38,7 +40,7 @@ def main():
     try:
         args = parse_args()
     except InvalidArguments:
-        exit(1)
+        return 1
 
     # Load config
     if args.configs:
@@ -51,18 +53,39 @@ def main():
     values = load_values(args.values_files, args.values)
 
     # Execute engine
-    ninjecto = Ninjecto(
-        config, values,
-        args.libraries,
-        args.input, args.output,
-    )
-    ninjecto.run(args.dry_run, args.override)
 
-    exit(0)
+    # Single file rendering
+    if args.input.is_file():
+        ninjecto = Ninjecto(
+            config, values,
+            args.libraries,
+            args.input, args.output,
+        )
+        ninjecto.run(args.dry_run, args.override)
+        return 0
+
+    # Directory - recursive rendering
+    for root, folders, files in walk(str(args.input)):
+        # str(input) as only 3.6+ supports passing Path
+
+        subpath = Path(root).relative_to(args.input)
+
+        for file in files:
+            inputfile = args.input / subpath / file
+            outputfile = args.output / subpath / file
+
+            ninjecto = Ninjecto(
+                config, values,
+                args.libraries,
+                inputfile, outputfile,
+            )
+            ninjecto.run(args.dry_run, args.override)
+
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    exit(main())
 
 
 __all__ = []
