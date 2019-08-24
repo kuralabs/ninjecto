@@ -24,8 +24,11 @@ from pathlib import Path
 from logging import getLogger
 
 from .core import Ninjecto
+from .local import load_local
 from .inputs import load_files
 from .values import load_values
+from .plugins.filters import FiltersLoader
+from .plugins.namespaces import NamespacesLoader
 
 
 log = getLogger(__name__)
@@ -42,24 +45,35 @@ def main():
     except InvalidArguments:
         return 1
 
-    # Load config
-    if args.configs:
-        log.info('Loading configuration files ...')
-    config = load_files(args.configs)
-
     # Load values
     if args.values_files:
         log.info('Loading values files ...')
     values = load_values(args.values_files, args.values)
+
+    # Load config
+    if args.configs:
+        log.info('Loading configuration files ...')
+    # Do something with the configuration
+    config = load_files(args.configs)  # noqa
+
+    # Load plugins
+    local = load_local(args.input.parent)
+    filters = FiltersLoader().load_functions()
+    namespaces = NamespacesLoader().load_functions()
 
     # Execute engine
 
     # Single file rendering
     if args.input.is_file():
         ninjecto = Ninjecto(
-            config, values,
+            config,
+            local,
+            filters,
+            namespaces,
             args.libraries,
-            args.input, args.output,
+            values,
+            args.input,
+            args.output,
         )
         ninjecto.run(args.dry_run, args.override)
         return 0
@@ -75,9 +89,14 @@ def main():
             outputfile = args.output / subpath / file
 
             ninjecto = Ninjecto(
-                config, values,
+                config,
+                local,
+                filters,
+                namespaces,
                 args.libraries,
-                inputfile, outputfile,
+                values,
+                inputfile,
+                outputfile,
             )
             ninjecto.run(args.dry_run, args.override)
 

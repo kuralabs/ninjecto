@@ -22,37 +22,91 @@ Core module.
 from logging import getLogger
 
 from pprintpp import pformat
-
-from .local import load_local
-from .plugins.filters import FiltersLoader
-from .plugins.namespaces import NamespacesLoader
+from jinja2 import (
+    Environment,
+    select_autoescape,
+    PrefixLoader, FileSystemLoader,
+)
 
 
 log = getLogger(__name__)
 
 
 class Ninjecto:
-    def __init__(self, config, values, libraries, source, destination):
+    def __init__(
+        self,
+        config,
+        local,
+        filters,
+        namespaces,
+        libraries,
+        values,
+        source,
+        destination,
+    ):
         self._config = config
-        self._values = values
+
+        self._local = local
+        self._filters = filters
+        self._namespaces = namespaces
+
         self._libraries = libraries
+
+        self._values = values
         self._source = source
         self._destination = destination
-
-        # Reload local plugins
-        FiltersLoader.reset()
-        NamespacesLoader.reset()
-
-        self._local = load_local(self._source.parent)
-        self._filters = FiltersLoader().load_functions(cache=False)
-        self._namespaces = NamespacesLoader().load_functions(cache=False)
 
     def run(self, dry_run, override):
 
         log.info('{} -> {}'.format(self._source, self._destination))
-        log.info('with:\n{}'.format(self._values))
+        log.info('With:\n{}'.format(self._values))
+
         log.info('Using filters:\n{}'.format(pformat(self._filters)))
         log.info('Using namespaces:\n{}'.format(pformat(self._namespaces)))
+
+        config = self._config.ninjecto
+
+        # Prepare environment
+        envconf = dict(config.environment)
+        envconf.update({
+            'autoescape': select_autoescape(
+                **config.autoescape,
+            ),
+            'loader': PrefixLoader({
+                '': FileSystemLoader(
+                    self._source.parent,
+                    encoding=config.filesystemloader.encoding,
+                    followlinks=config.filesystemloader.followlinks,
+                ),
+                'library': FileSystemLoader(
+                    self._libraries,
+                    encoding=config.filesystemloader.encoding,
+                    followlinks=config.filesystemloader.followlinks,
+                ),
+            }),
+        })
+        environment = Environment(**envconf)
+
+        for key, fltr in self._filters.items():
+            environment.filters[key] = fltr
+
+        # Render template
+        template = environment.get_template(self._source.name)
+        render = template.render(values={
+            **self._namespaces,
+            **{
+                'values': self._values,
+            }
+        })
+
+        # Write output
+        if not dry_run:
+            self._destination.parent.mkdir(parents=True, exist_ok=True)
+            self._destination.write_text(
+                render, encoding=config.output.encoding,
+            )
+
+        return render
 
 
 __all__ = [
