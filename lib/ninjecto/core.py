@@ -19,6 +19,7 @@
 Core module.
 """
 
+from pathlib import Path
 from logging import getLogger
 
 from pprintpp import pformat
@@ -30,6 +31,9 @@ from jinja2 import (
 
 
 log = getLogger(__name__)
+
+
+TheTemplate = type('TheTemplate', (), {})()
 
 
 class Ninjecto:
@@ -64,7 +68,70 @@ class Ninjecto:
         log.info('Using filters:\n{}'.format(pformat(self._filters)))
         log.info('Using namespaces:\n{}'.format(pformat(self._namespaces)))
 
+        self._dry_run = dry_run
+        self._override = override
+        return self.process_file(
+            self._source,
+            self._destination,
+            root=True,
+        )
+
+    def process_file(self, src, dstdir, root=False):
         config = self._config.ninjecto
+        dry_run = self._dry_run
+        override = self._override
+
+        # First thing first, render the filename
+        dstfn = self.render(src.name)
+
+        # Now with the name, we have an output
+        dst = dstdir / dstfn
+
+        # Check override
+        if dst.exists() and not override:
+            raise RuntimeError(
+                '{} exists. '
+                'Use --override to override files and directories.'.format(
+                    dst,
+                )
+            )
+
+        # Check if file, if file, render content and write
+        if src.is_file():
+            dstcnt = self.render(src)
+            if not dry_run:
+                dst.write_text(
+                    dstcnt, encoding=config.output.encoding,
+                )
+
+            return 1
+
+        # If directory, recurse into it
+        elif src.is_dir():
+
+            if not dry_run:
+                dst.mkdir(exist_ok=override)
+
+            processed = 1
+            for subfile in src.iterdir():
+                processed += self.process_file(subfile, dst)
+
+            return processed
+
+        raise RuntimeError(
+            '{} isn\'t a file nor directory. '
+            'Don\'t know what to do.'.format(src)
+        )
+
+    def render(self, template):
+        config = self._config.ninjecto
+
+        # In case of a template file
+        if isinstance(template, Path):
+            loader = None
+        # In case of a filename
+        else:
+            loader = None
 
         # Prepare environment
         envconf = dict(config.environment)
@@ -73,11 +140,7 @@ class Ninjecto:
                 **config.autoescape,
             ),
             'loader': PrefixLoader({
-                '': FileSystemLoader(
-                    self._source.parent,
-                    encoding=config.filesystemloader.encoding,
-                    followlinks=config.filesystemloader.followlinks,
-                ),
+                '': loader,
                 'library': FileSystemLoader(
                     self._libraries,
                     encoding=config.filesystemloader.encoding,
@@ -91,20 +154,13 @@ class Ninjecto:
             environment.filters[key] = fltr
 
         # Render template
-        template = environment.get_template(self._source.name)
+        template = environment.get_template(TheTemplate)
         render = template.render(values={
             **self._namespaces,
             **{
                 'values': self._values,
             }
         })
-
-        # Write output
-        if not dry_run:
-            self._destination.parent.mkdir(parents=True, exist_ok=True)
-            self._destination.write_text(
-                render, encoding=config.output.encoding,
-            )
 
         return render
 

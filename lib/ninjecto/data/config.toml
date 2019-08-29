@@ -1,3 +1,6 @@
+[ninjecto.input.encoding]
+encoding = "utf-8"
+
 [ninjecto.output.encoding]
 encoding = "utf-8"
 

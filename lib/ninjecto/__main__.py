@@ -62,44 +62,17 @@ def main():
     namespaces = NamespacesLoader().load_functions()
 
     # Execute engine
-
-    # Single file rendering
-    if args.input.is_file():
-        ninjecto = Ninjecto(
-            config,
-            local,
-            filters,
-            namespaces,
-            args.libraries,
-            values,
-            args.input,
-            args.output,
-        )
-        ninjecto.run(args.dry_run, args.override)
-        return 0
-
-    # Directory - recursive rendering
-    for root, folders, files in walk(str(args.input)):
-        # str(input) as only 3.6+ supports passing Path
-
-        subpath = Path(root).relative_to(args.input)
-
-        for file in files:
-            inputfile = args.input / subpath / file
-            outputfile = args.output / subpath / file
-
-            ninjecto = Ninjecto(
-                config,
-                local,
-                filters,
-                namespaces,
-                args.libraries,
-                values,
-                inputfile,
-                outputfile,
-            )
-            ninjecto.run(args.dry_run, args.override)
-
+    ninjecto = Ninjecto(
+        config,
+        local,
+        filters,
+        namespaces,
+        args.libraries,
+        values,
+        args.input,
+        args.output,
+    )
+    ninjecto.run(args.dry_run, args.override)
     return 0
 
 
