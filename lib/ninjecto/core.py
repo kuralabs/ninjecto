@@ -83,7 +83,7 @@ class Ninjecto:
 
         # First thing first, render the filename
         if filename is None:
-            filename = self.render(src.name)
+            filename = self.render(src.name, src.name)
 
         # Now with the name, we have an output
         dst = dstdir / filename
@@ -100,6 +100,7 @@ class Ninjecto:
         # Check if file, if file, render content and write
         if src.is_file():
             content = self.render(
+                src.name,
                 src.read_text(encoding=config.input.encoding)
             )
             if not dry_run:
@@ -126,7 +127,7 @@ class Ninjecto:
             'Don\'t know what to do.'.format(src)
         )
 
-    def render(self, template):
+    def render(self, name, content):
         config = self._config.ninjecto
 
         # Prepare environment
@@ -137,7 +138,7 @@ class Ninjecto:
             ),
             'loader': PrefixLoader({
                 '': DictLoader({
-                    '': template,
+                    name: content,
                 }),
                 'library': FileSystemLoader(
                     self._libraries,
@@ -152,7 +153,7 @@ class Ninjecto:
             environment.filters[key] = fltr
 
         # Render template
-        template = environment.get_template('')
+        template = environment.get_template(name)
         render = template.render(values={
             **self._namespaces,
             **{
