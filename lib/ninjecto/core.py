@@ -19,21 +19,19 @@
 Core module.
 """
 
-from pathlib import Path
 from logging import getLogger
 
 from pprintpp import pformat
 from jinja2 import (
-    Environment,
     select_autoescape,
-    PrefixLoader, FileSystemLoader,
+    Environment,
+    DictLoader,
+    PrefixLoader,
+    FileSystemLoader,
 )
 
 
 log = getLogger(__name__)
-
-
-TheTemplate = type('TheTemplate', (), {})()
 
 
 class Ninjecto:
@@ -47,6 +45,7 @@ class Ninjecto:
         values,
         source,
         destination,
+        filename,
     ):
         self._config = config
 
@@ -59,6 +58,7 @@ class Ninjecto:
         self._values = values
         self._source = source
         self._destination = destination
+        self._filename = filename
 
     def run(self, dry_run, override):
 
@@ -73,35 +73,38 @@ class Ninjecto:
         return self.process_file(
             self._source,
             self._destination,
-            root=True,
+            self._filename,
         )
 
-    def process_file(self, src, dstdir, root=False):
+    def process_file(self, src, dstdir, filename=None):
         config = self._config.ninjecto
         dry_run = self._dry_run
         override = self._override
 
         # First thing first, render the filename
-        dstfn = self.render(src.name)
+        if filename is None:
+            filename = self.render(src.name)
 
         # Now with the name, we have an output
-        dst = dstdir / dstfn
+        dst = dstdir / filename
 
         # Check override
         if dst.exists() and not override:
             raise RuntimeError(
                 '{} exists. '
-                'Use --override to override files and directories.'.format(
+                'Use --force to override files and directories.'.format(
                     dst,
                 )
             )
 
         # Check if file, if file, render content and write
         if src.is_file():
-            dstcnt = self.render(src)
+            content = self.render(
+                src.read_text(encoding=config.input.encoding)
+            )
             if not dry_run:
                 dst.write_text(
-                    dstcnt, encoding=config.output.encoding,
+                    content, encoding=config.output.encoding,
                 )
 
             return 1
@@ -126,13 +129,6 @@ class Ninjecto:
     def render(self, template):
         config = self._config.ninjecto
 
-        # In case of a template file
-        if isinstance(template, Path):
-            loader = None
-        # In case of a filename
-        else:
-            loader = None
-
         # Prepare environment
         envconf = dict(config.environment)
         envconf.update({
@@ -140,7 +136,9 @@ class Ninjecto:
                 **config.autoescape,
             ),
             'loader': PrefixLoader({
-                '': loader,
+                '': DictLoader({
+                    '': template,
+                }),
                 'library': FileSystemLoader(
                     self._libraries,
                     encoding=config.filesystemloader.encoding,
@@ -154,7 +152,7 @@ class Ninjecto:
             environment.filters[key] = fltr
 
         # Render template
-        template = environment.get_template(TheTemplate)
+        template = environment.get_template('')
         render = template.render(values={
             **self._namespaces,
             **{

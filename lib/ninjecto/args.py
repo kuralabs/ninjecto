@@ -131,26 +131,33 @@ def validate_args(args):
 
     log.debug('Arguments:\n{}'.format(args))
 
-    # Check if input exists
-    args.input = Path(args.input)
+    # Check if source exists
+    args.source = Path(args.source)
 
-    if not args.input.exists():
+    if not args.source.exists():
         raise InvalidArguments(
-            'No such file or directory {}'.format(args.input)
+            'No such file or directory {}'.format(args.source)
         )
 
-    args.input = args.input.resolve()
+    args.source = args.source.resolve()
 
-    # Check if output exists
-    args.output = Path(args.output)
+    # Check if destination exists
+    args.destination = Path(args.destination)
 
-    if args.output.exists() and not args.override:
+    if args.destination.exists() and not args.override:
         raise InvalidArguments(
             'Output file or directory {} exists. '
             'Use --override to force overriding.'
         )
 
-    args.output = args.output.resolve()
+    args.destination = args.destination.resolve()
+
+    # Check output flag semantics
+    # FIXME: Maybe use a Default class
+    if args.output and args.output_in:
+        raise InvalidArguments('Either use --output or --output-in')
+    if args.output is None and args.output_in is None:
+        args.output = True
 
     # Check if files and directories exists
     for human, argsattr, checker in [
@@ -320,17 +327,33 @@ def parse_args(argv=None):
 
     # Input and outputs
     parser.add_argument(
-        '-o', '--override',
+        '-f', '--force',
         help='Override existing files',
         default=False,
         action='store_true'
     )
+
     parser.add_argument(
-        'input',
+        '-o', '--output',
+        help='Write generated file or directory to OUTPUT',
+        default=None,
+        action='store_true'
+    )
+    parser.add_argument(
+        '-i', '--output-in',
+        help='Write generated files in the OUTPUT directory',
+        default=None,
+        action='store_true'
+    )
+
+    parser.add_argument(
+        'source',
+        metavar='SRC',
         help='File or directory to render'
     )
     parser.add_argument(
-        'output',
+        'destination',
+        metavar='DST',
         help='File or directory to write to'
     )
 

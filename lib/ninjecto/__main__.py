@@ -19,8 +19,6 @@
 Executable module entry point.
 """
 
-from os import walk
-from pathlib import Path
 from logging import getLogger
 
 from .core import Ninjecto
@@ -57,9 +55,19 @@ def main():
     config = load_files(args.configs)  # noqa
 
     # Load plugins
-    local = load_local(args.input.parent)
+    local = load_local(args.source.parent)
     filters = FiltersLoader().load_functions()
     namespaces = NamespacesLoader().load_functions()
+
+    # Determine destination
+    if args.output:
+        destination = args.destination.parent
+        filename = args.destination.name
+    elif args.output_in:
+        destination = args.destination
+        filename = None
+    else:
+        raise RuntimeError('Invalid semantics for output')
 
     # Execute engine
     ninjecto = Ninjecto(
@@ -69,8 +77,9 @@ def main():
         namespaces,
         args.libraries,
         values,
-        args.input,
-        args.output,
+        args.source,
+        destination,
+        filename,
     )
     ninjecto.run(args.dry_run, args.override)
     return 0
