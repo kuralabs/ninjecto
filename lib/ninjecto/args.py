@@ -147,7 +147,9 @@ def validate_args(args):
     if args.destination.exists() and not args.override:
         raise InvalidArguments(
             'Output file or directory {} exists. '
-            'Use --override to force overriding.'
+            'Use --force to force overriding.'.format(
+                args.destination,
+            )
         )
 
     args.destination = args.destination.resolve()
@@ -300,9 +302,9 @@ def parse_args(argv=None):
     # Dry run
     parser.add_argument(
         '-d', '--dry-run',
-        help='Dry run the pipeline',
         action='store_true',
         default=False,
+        help='Dry run the pipeline',
     )
 
     # Values
@@ -314,7 +316,7 @@ def parse_args(argv=None):
         help='Values to render inputs with'
     )
     parser.add_argument(
-        '-f', '--values-file',
+        '-u', '--values-file',
         action='append',
         dest='values_files',
         default=[],
@@ -328,33 +330,34 @@ def parse_args(argv=None):
     # Input and outputs
     parser.add_argument(
         '-f', '--force',
-        help='Override existing files',
+        action='store_true',
+        dest='override',
         default=False,
-        action='store_true'
+        help='Override existing files',
     )
 
     parser.add_argument(
         '-o', '--output',
-        help='Write generated file or directory to OUTPUT',
+        action='store_true',
         default=None,
-        action='store_true'
+        help='Write generated file or directory to OUTPUT',
     )
     parser.add_argument(
         '-i', '--output-in',
-        help='Write generated files in the OUTPUT directory',
+        action='store_true',
         default=None,
-        action='store_true'
+        help='Write generated files in the OUTPUT directory',
     )
 
     parser.add_argument(
         'source',
         metavar='SRC',
-        help='File or directory to render'
+        help='File or directory to render',
     )
     parser.add_argument(
         'destination',
         metavar='DST',
-        help='File or directory to write to'
+        help='File or directory to write to',
     )
 
     # Parse and validate arguments
