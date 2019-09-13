@@ -1,6 +1,11 @@
 - Dry run
 - Nice progression
+- Autoconfig files:
+    - system
+    - user
+    - local
 
-
-- Plugins? Environments, filters.
---templates
+- Documentation
+    - How to libraries
+    - How to config files
+- Examples
