@@ -60,7 +60,7 @@ class Ninjecto:
         self._destination = destination
         self._filename = filename
 
-    def run(self, dry_run, override):
+    def run(self, dry_run=False, override=False, levels=None):
 
         log.info('{} -> {}'.format(self._source, self._destination))
         log.info('With:\n{}'.format(self._values))
@@ -70,16 +70,21 @@ class Ninjecto:
 
         self._dry_run = dry_run
         self._override = override
+        self._levels = levels
         return self.process_file(
             self._source,
             self._destination,
             self._filename,
+            self._levels,
         )
 
-    def process_file(self, src, dstdir, filename=None):
+    def process_file(self, src, dstdir, filename=None, levels=None):
         config = self._config.ninjecto
         dry_run = self._dry_run
         override = self._override
+
+        if levels is not None and levels < 1:
+            return 0
 
         # First thing first, render the filename
         if filename is None:
@@ -118,7 +123,11 @@ class Ninjecto:
 
             processed = 1
             for subfile in src.iterdir():
-                processed += self.process_file(subfile, dst)
+                processed += self.process_file(
+                    subfile, dst,
+                    filename=None,
+                    levels=(levels - 1),
+                )
 
             return processed
 

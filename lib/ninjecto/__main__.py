@@ -81,7 +81,11 @@ def main():
         destination,
         filename,
     )
-    ninjecto.run(args.dry_run, args.override)
+    ninjecto.run(
+        dry_run=args.dry_run,
+        override=args.override,
+        levels=args.levels,
+    )
     return 0
 
 

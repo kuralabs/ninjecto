@@ -335,6 +335,12 @@ def parse_args(argv=None):
         default=False,
         help='Override existing files',
     )
+    parser.add_argument(
+        '-r', '--levels',
+        type=int,
+        default=None,
+        help='Limit recursion for directories to this number of levels',
+    )
 
     parser.add_argument(
         '-o', '--output',
