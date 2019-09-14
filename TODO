@@ -1,5 +1,6 @@
 - Dry run
 - Nice progression
+- Avoid overriding the source
 - Autoconfig files:
     - system
     - user

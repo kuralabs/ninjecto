@@ -1,7 +1,7 @@
-[ninjecto.input.encoding]
+[ninjecto.input]
 encoding = "utf-8"
 
-[ninjecto.output.encoding]
+[ninjecto.output]
 encoding = "utf-8"
 
 [ninjecto.filesystemloader]

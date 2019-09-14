@@ -51,8 +51,8 @@ def main():
     # Load config
     if args.configs:
         log.info('Loading configuration files ...')
-    # Do something with the configuration
-    config = load_files(args.configs)  # noqa
+
+    config = load_files(args.configs)
 
     # Load plugins
     local = load_local(args.source.parent)

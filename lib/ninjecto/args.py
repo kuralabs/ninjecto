@@ -141,16 +141,21 @@ def validate_args(args):
 
     args.source = args.source.resolve()
 
-    # Check if destination exists
+    # Check destination
     args.destination = Path(args.destination)
 
-    if args.destination.exists() and not args.override:
-        raise InvalidArguments(
-            'Output file or directory {} exists. '
-            'Use --force to force overriding.'.format(
-                args.destination,
+    if args.destination.exists():
+        if args.output and not args.override:
+            raise InvalidArguments(
+                'Output file or directory "{}" exists. '
+                'Use --force to force overriding.'.format(
+                    str(args.destination),
+                )
             )
-        )
+        elif args.output_in and not args.destination.is_dir():
+            raise InvalidArguments(
+                'Output must be a directory when using --output-in.'
+            )
 
     args.destination = args.destination.resolve()
 

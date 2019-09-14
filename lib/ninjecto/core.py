@@ -25,10 +25,13 @@ from pprintpp import pformat
 from jinja2 import (
     select_autoescape,
     Environment,
+    ChoiceLoader,
     DictLoader,
     PrefixLoader,
     FileSystemLoader,
 )
+
+from .utils.dictionary import Namespace
 
 
 log = getLogger(__name__)
@@ -47,7 +50,7 @@ class Ninjecto:
         destination,
         filename,
     ):
-        self._config = config
+        self._config = Namespace(config)
 
         self._local = local
         self._filters = filters
@@ -143,18 +146,20 @@ class Ninjecto:
         envconf = dict(config.environment)
         envconf.update({
             'autoescape': select_autoescape(
-                **config.autoescape,
+                **dict(config.autoescape),
             ),
-            'loader': PrefixLoader({
-                '': DictLoader({
+            'loader': ChoiceLoader([
+                DictLoader({
                     name: content,
                 }),
-                'library': FileSystemLoader(
-                    self._libraries,
-                    encoding=config.filesystemloader.encoding,
-                    followlinks=config.filesystemloader.followlinks,
-                ),
-            }),
+                PrefixLoader({
+                    'library': FileSystemLoader(
+                        self._libraries,
+                        encoding=config.filesystemloader.encoding,
+                        followlinks=config.filesystemloader.followlinks,
+                    ),
+                }),
+            ]),
         })
         environment = Environment(**envconf)
 
@@ -163,7 +168,7 @@ class Ninjecto:
 
         # Render template
         template = environment.get_template(name)
-        render = template.render(values={
+        render = template.render(**{
             **self._namespaces,
             **{
                 'values': self._values,
