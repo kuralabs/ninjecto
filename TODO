@@ -1,10 +1,7 @@
 - Dry run
 - Nice progression
 - Avoid overriding the source
-- Autoconfig files:
-    - system
-    - user
-    - local
+- Avoid breaking when system configuration files (non-explicit) are broken.
 
 - Documentation
     - How to libraries

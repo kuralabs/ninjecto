@@ -23,7 +23,7 @@ from logging import getLogger
 
 from .core import Ninjecto
 from .local import load_local
-from .inputs import load_files
+from .config import load_config
 from .values import load_values
 from .plugins.filters import FiltersLoader
 from .plugins.namespaces import NamespacesLoader
@@ -52,7 +52,7 @@ def main():
     if args.configs:
         log.info('Loading configuration files ...')
 
-    config = load_files(args.configs)
+    config = load_config(args.configs)
 
     # Load plugins
     local = load_local(args.source.parent)
