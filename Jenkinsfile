@@ -47,7 +47,7 @@ pipeline {
                     umask 022
                     mkdir -p /deploy/docs/ninjecto
                     rm -rf /deploy/docs/ninjecto/*
-                    cp -R .tox/env/tmp/html/* /deploy/docs/ninjecto/
+                    cp -R .tox/doc/tmp/html/* /deploy/docs/ninjecto/
                 '''
             }
         }
