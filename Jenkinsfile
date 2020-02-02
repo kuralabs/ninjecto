@@ -1,17 +1,14 @@
 pipeline {
-    agent none
+    agent { label 'docker' }
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'kuralabs/python3-dev:latest'
-                }
-            }
+            agent { docker { image 'python:3.6' } }
 
             steps {
                 sh '''
-                    tox -r
+                    pip3 install tox
+                    tox --recreate
                 '''
                 stash name: 'docs', includes: '.tox/doc/tmp/html/**/*'
             }
@@ -19,7 +16,11 @@ pipeline {
 
         stage('Publish') {
             agent { label 'docs' }
-            when { branch 'master' }
+            when {
+                beforeAgent true
+                branch 'master'
+            }
+
             steps {
                 unstash 'docs'
                 sh '''
@@ -35,14 +36,16 @@ pipeline {
         success {
             slackSend (
                 color: '#00FF00',
-                message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                message: ":sunny: SUCCESSFUL: " +
+                    "<${env.BUILD_URL}|[${env.BUILD_NUMBER}] ${env.JOB_NAME}>"
             )
         }
 
         failure {
             slackSend (
                 color: '#FF0000',
-                message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                message: ":rain_cloud: FAILED: " +
+                    "<${env.BUILD_URL}|[${env.BUILD_NUMBER}] ${env.JOB_NAME}>"
             )
         }
     }

@@ -34,13 +34,13 @@ Install
 Changelog
 =========
 
-1.0.0 (YYYY-MM-DD)
+0.1.0 (2020-02-01)
 ------------------
 
 New
 ~~~
 
-- Initial version.
+- Development preview.
 
 
 License
@@ -48,7 +48,7 @@ License
 
 ::
 
-   Copyright (C) 2017-2019 KuraLabs S.R.L
+   Copyright (C) 2017-2020 KuraLabs S.R.L
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
