@@ -87,3 +87,8 @@ __all__ = [
     'DateTimeJSONEncoder',
     'json_dumps',
 ]
+__api__ = [
+    'iso8601_to_datetime',
+    'datetime_to_iso8601',
+    'DateTimeJSONEncoder',
+]
