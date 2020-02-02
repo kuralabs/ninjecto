@@ -1,14 +1,34 @@
 pipeline {
     agent { label 'docker' }
 
+    environment {
+        ADJUST_USER_UID = sh(
+            returnStdout: true,
+            script: 'id -u'
+        ).trim()
+        ADJUST_USER_GID = sh(
+            returnStdout: true,
+            script: 'id -g'
+        ).trim()
+        ADJUST_DOCKER_GID = sh(
+            returnStdout: true,
+            script: 'getent group docker | cut -d: -f3'
+        ).trim()
+    }
+
     stages {
         stage('Build') {
-            agent { docker { image 'python:3.6' } }
+            agent {
+                docker {
+                    alwaysPull true
+                    image 'kuralabs/python3-dev:latest'
+                    args '-u root:root'
+                }
+            }
 
             steps {
                 sh '''
-                    pip3 install tox
-                    tox --recreate
+                    sudo --user=python3 --preserve-env --set-home tox --recreate
                 '''
                 stash name: 'docs', includes: '.tox/doc/tmp/html/**/*'
             }
