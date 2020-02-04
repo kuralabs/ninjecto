@@ -34,6 +34,15 @@ Install
 Changelog
 =========
 
+0.1.1 (2020-02-03)
+------------------
+
+Fix
+~~~
+
+- Fixes TypeError caused by invalid value of the levels parameter.
+
+
 0.1.0 (2020-02-01)
 ------------------
 
