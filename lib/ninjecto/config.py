@@ -43,14 +43,15 @@ def load_config(configs):
     #. System's configuration from ``/etc/ninjecto/config.xxx``
     #. User's configuration from
        ``$XDG_CONFIG_HOME/ninjecto/config.xxx`` or
-       ``$HOME/ninjecto/config.xxx`` if
+       ``$HOME/.config/ninjecto/config.xxx`` if
        ``$XDG_CONFIG_HOME`` is unavailable.
     #. User's "alternative" configuration from ``$HOME/.ninjerc.xxx``.
     #. Project's global configuration from ``<gitroot>/.ninjerc.xxx``
        ``<gitroot>`` is determined by :func:`ninjecto.utils.git.find_root`.
        Currently, ``git`` is the only version control system supported.
     #. Project's "high-priority" local configuration from
-       ``$PWD/.ninjerc.xxx``.
+       ``$PWD/.ninjerc.xxx``, but only if $PWD is different from the <gitroot>
+       (if available).
     #. Additional given configuration files, in order.
 
     :param list configs: List of paths to configurations files to load.

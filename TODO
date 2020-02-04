@@ -5,6 +5,19 @@ Fixes
 -----
 
 - Fix namespaces.
+- Inconsistent loading behavior:
+
+  - Load ninjeconf.py from another directory? i.e when ninjeconf.py is in CWD
+    but source is not.
+    - Currently, ninjeconf.py is loaded from source directory.
+  - Load .ninjerc.xxx from source directory? i.e when source is not in CWD.
+    - .ninjerc.xx is not loaded from source, gitroot and CWD are the latest too
+      resolution paths.
+
+  Could all this be fixed with the following changes?:
+
+ - Do not load ninjeconf.py from source relative, do it from PWD.
+ - Add --cd-to-src so the behavior is the same?
 
 Documentation
 -------------
@@ -20,10 +33,6 @@ Features
 
 - Nice progression: maybe a progress bar, or at least nice logging about what
   Ninjecto is currently processing.
-- ninjeconf.py in another directory? (When ninjeconf.py in CWD but source not)
-- .ninjerc.xxx in source directory? (When source not in CWD)
-  -> ninjeconf.py is loaded from source directory.
-  -> .ninjerc.xx is not, gitroot and CWD are the latest too resolution paths.
 - ninjecto --create, or ninjecto create <name> (vs ninjecto render): render a
   start template with name <name>.
 - Command file to execute render? How to execute it? ninjecto render-project ?
