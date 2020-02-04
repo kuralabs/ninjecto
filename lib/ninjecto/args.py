@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2020 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -131,6 +131,13 @@ def validate_args(args):
 
     log.debug('Arguments:\n{}'.format(args))
 
+    # Check output flag semantics
+    # XXX: Maybe use a Default class
+    if args.output and args.output_in:
+        raise InvalidArguments('Either use --output or --output-in')
+    if args.output is None and args.output_in is None:
+        args.output = True
+
     # Check if source exists
     args.source = Path(args.source)
 
@@ -158,13 +165,6 @@ def validate_args(args):
             )
 
     args.destination = args.destination.resolve()
-
-    # Check output flag semantics
-    # FIXME: Maybe use a Default class
-    if args.output and args.output_in:
-        raise InvalidArguments('Either use --output or --output-in')
-    if args.output is None and args.output_in is None:
-        args.output = True
 
     # Check if files and directories exists
     for human, argsattr, checker in [
