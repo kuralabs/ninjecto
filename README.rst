@@ -34,6 +34,15 @@ Install
 Changelog
 =========
 
+0.2.0 (2020-02-03)
+------------------
+
+Fix
+~~~
+
+- Rendered files will now have the same permissions as the source files.
+
+
 0.1.1 (2020-02-03)
 ------------------
 
