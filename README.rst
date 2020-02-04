@@ -34,6 +34,16 @@ Install
 Changelog
 =========
 
+0.2.1 (2020-02-04)
+------------------
+
+Fix
+~~~
+
+- Default output mode will now be set before checking the input and output
+  paths, offering a better error message.
+
+
 0.2.0 (2020-02-03)
 ------------------
 
