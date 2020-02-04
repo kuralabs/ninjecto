@@ -1,9 +1,49 @@
-- Dry run
-- Nice progression
-- Avoid overriding the source
-- Avoid breaking when system configuration files (non-explicit) are broken.
+TODO
+====
 
-- Documentation
-    - How to libraries
-    - How to config files
-- Examples
+Fixes
+-----
+
+- Fix namespaces.
+
+Documentation
+-------------
+
+- Input and output.
+- Values.
+- Libraries.
+- ninjeconf.py
+- Configuration and .ninjerc.xxx
+
+Features
+--------
+
+- Nice progression: maybe a progress bar, or at least nice logging about what
+  Ninjecto is currently processing.
+- ninjeconf.py in another directory? (When ninjeconf.py in CWD but source not)
+- .ninjerc.xxx in source directory? (When source not in CWD)
+  -> ninjeconf.py is loaded from source directory.
+  -> .ninjerc.xx is not, gitroot and CWD are the latest too resolution paths.
+- ninjecto --create, or ninjecto create <name> (vs ninjecto render): render a
+  start template with name <name>.
+- Command file to execute render? How to execute it? ninjecto render-project ?
+- Add support for ninjecto projects in remote git repositories:
+  Allow to specify: protocol, user, (password?), repository, revision, tag or
+  branch and subdirectory.
+- Change directory to source file? Maybe this could help some people with their
+  project setup.
+
+Checking
+--------
+
+- Avoid overriding the source: is this mandatory? The cases are at least:
+  - If source is a directory:
+    - Output in and output is source directory: FAIL
+    - Output and output is source directory: FAIL
+  - If source is a file:
+    - Output in and output is source file: FAIL, that makes no sense,
+      output_in must be always a directory.
+    - Output and output is source path: MAYBE?! Override the file? Why not?
+      Ugly?
+- Avoid breaking when system configuration files (non-explicit) are broken.
+- What about binary files in the template?
