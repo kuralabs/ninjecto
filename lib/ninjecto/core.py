@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2020 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ class Ninjecto:
                 dst.write_text(
                     content, encoding=config.output.encoding,
                 )
+                dst.chmod(src.stat().st_mode)
 
             return 1
 
@@ -123,6 +124,7 @@ class Ninjecto:
 
             if not dry_run:
                 dst.mkdir(exist_ok=override)
+                dst.chmod(src.stat().st_mode)
 
             processed = 1
             levels = None if levels is None else levels - 1
