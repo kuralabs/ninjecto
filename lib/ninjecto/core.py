@@ -125,11 +125,13 @@ class Ninjecto:
                 dst.mkdir(exist_ok=override)
 
             processed = 1
+            levels = None if levels is None else levels - 1
+
             for subfile in src.iterdir():
                 processed += self.process_file(
                     subfile, dst,
                     filename=None,
-                    levels=(levels - 1),
+                    levels=levels,
                 )
 
             return processed
