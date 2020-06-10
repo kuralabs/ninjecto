@@ -17,3 +17,9 @@ pprintpp
 
 pytest
 pytest-cov
+
+#######################
+# Assertion           #
+#######################
+
+packaging
