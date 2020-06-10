@@ -54,7 +54,7 @@ def autocast(value):
 
     :return: This function will try to convert a string to a:
 
-     - ``datetime``, if string is in ISO8601 format.
+     - ``datetime``, if string is in ISO8601 with timezone format.
      - ``int``, if succeeds.
      - ``float``, if succeeds.
      - ``boolean``, using the :py:func:`booleanize` function.
