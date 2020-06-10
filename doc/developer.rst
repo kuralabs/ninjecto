@@ -1,5 +1,7 @@
 .. toctree::
 
+.. _developer-guide:
+
 ===============
 Developer Guide
 ===============
@@ -57,26 +59,28 @@ Building Documentation
 
    tox -e doc
 
-Output will be available at ``.tox/doc/tmp/html``.
+Output documentation will be available at ``.tox/doc/tmp/html``.
+To view the documentation execute:
 
 .. code-block:: sh
 
    webdev .tox/doc/tmp/html
 
 
-Running Test Suite
-==================
+Running Tests
+=============
 
 .. code-block:: sh
 
    tox -e test
 
-Output will be available at ``.tox/test/tmp/``.
+Results will be available at ``.tox/test/tmp/``. To view the results
+execute:
 
 .. code-block:: sh
 
    webdev .tox/test/tmp/
 
-- Test results: ``tests.xml``.
-- Coverage results: ``coverage.xml``.
-- Coverage report: ``coverage.html``.
+- Test XML results: ``tests.xml``.
+- Coverage XML results: ``coverage.xml``.
+- Coverage HTML report: ``htmlcov/index.html``.
