@@ -143,7 +143,7 @@ def validate_args(args):
 
     if not args.source.exists():
         raise InvalidArguments(
-            'No such file or directory {}'.format(args.source)
+            'No such input file or directory: "{}"'.format(args.source)
         )
 
     args.source = args.source.resolve()
@@ -163,6 +163,16 @@ def validate_args(args):
             raise InvalidArguments(
                 'Output must be a directory when using --output-in.'
             )
+    elif args.output_in:
+        if not args.parents:
+            raise InvalidArguments(
+                'No such output directory "{}" exists. '
+                'Use --parents to create it.'.format(
+                    str(args.destination),
+                )
+            )
+
+        args.destination.mkdir(parents=True)
 
     args.destination = args.destination.resolve()
 
@@ -190,7 +200,7 @@ def validate_args(args):
         ]
         if missing:
             raise InvalidArguments(
-                'No such {} {}'.format(
+                'No such {}: {}'.format(
                     human,
                     ', '.join(map(str, missing)),
                 )
@@ -358,6 +368,12 @@ def parse_args(argv=None):
         action='store_true',
         default=None,
         help='Write generated files in the OUTPUT directory',
+    )
+    parser.add_argument(
+        '-p', '--parents',
+        action='store_true',
+        default=False,
+        help='Create directory and its parents when using --output-in mode',
     )
 
     parser.add_argument(
