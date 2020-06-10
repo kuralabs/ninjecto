@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2020 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ from os import environ
 from logging import getLogger
 from collections import namedtuple
 
-from ...schema import SLUG_REGEX
-
 
 log = getLogger(__name__)
+
+
+SLUG_REGEX = r'^[a-zA-Z][a-zA-Z0-9_]*$'
 
 
 def namespace_env(config, filepath):
