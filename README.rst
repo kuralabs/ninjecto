@@ -34,6 +34,38 @@ Install
 Changelog
 =========
 
+0.3.0 (2020-06-10)
+------------------
+
+New
+~~~
+
+- Allows to define the behavior when encountering undefined values in the
+  template.
+- Allows conditional creation of files, so depending of a value a file can be
+  created or not.
+- Rendering is now faster when rendering empty files.
+- Ninjecto's CLI now supports passing ``--parents`` to create any parent
+  directory of the output directory.
+- New filters: ``comment``, ``quote`` and ``read``.
+- New filters from awesome Inflection_ package.
+
+  Inflection is now a third party dependency, which includes the new filters:
+  ``camelize``, ``dasherize``, ``humanize``, ``ordinal``, ``ordinalize``,
+  ``parameterize``, ``pluralize``, ``singularize``, ``tableize``, ``titleize``,
+  ``transliterate`` and ``underscore``.
+
+  Also, the Cerberus dependency was dropped as it is unused (for now).
+
+.. _Inflection: https://inflection.readthedocs.io/en/latest/
+
+
+Fix
+~~~
+
+  - Values and namespaces are now available globally, in particular inside macros in libraries.
+
+
 0.2.1 (2020-02-04)
 ------------------
 
