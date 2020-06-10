@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2020 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +15,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from packaging import version
 
 from ninjecto import __version__
 
 
-def test_semantic_version():
+def test_version():
     """
-    Check that version follows the Semantic Versioning 2.0.0 specification.
+    Check that version is PEP 440 compliant.
 
-        http://semver.org/
+        https://www.python.org/dev/peps/pep-0440/
 
     This is basically the basic test to bootstrap a pytest testing suite.
     """
-    mayor, minor, rev = map(int, __version__.split('.'))
-
-    assert mayor >= 0
-    assert minor >= 0
-    assert rev >= 0
+    assert version.parse(__version__) >= version.parse('0.1.0')
