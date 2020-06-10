@@ -30,3 +30,6 @@ ninjecto:
     disabled_extensions: []
     default_for_string: true
     default: false
+
+  undefined:
+    clss: 'Undefined'
