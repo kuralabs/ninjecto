@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2019 KuraLabs S.R.L
+# Copyright (C) 2019-2020 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,47 +19,66 @@
 Utilities to handle ISO 8601 formatted dates.
 """
 
-from datetime import datetime
 from functools import partial
-from json import dumps, JSONEncoder
+from datetime import datetime
+from json import JSONEncoder, dumps as jsondumps
 
 
-ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%S'
+ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 
 
-def iso8601_to_datetime(date_string):
+def iso8601_to_datetime(whenstr):
     """
-    Converts a date of the format YYYY:MM:DDTHH:MM:SS (ISO 8601) to
-    a datetime object.
+    Converts a date in the ISO8601 with timezone format to a datetime object
+    with timezone.
 
-    This function is somewhat analogous to::
+    The format is of the form `` YYYY-MM-DDTHH:MM:SS.MS-TZ``, for example::
 
-        from datetime import datetime
-        datetime.fromisoformat('2019-08-05T14:38:13')
+        2020-06-10T01:47:35.186550-06:00
 
-    But since :py:func:`datetime.fromisoformat` was added only in
-    Python 3.7 this function is left for backward compatibility.
+    Prior to Python 3.7, :py:meth:`datetime.datetime.strptime()` *``%z``* was
+    only able to parse the timezone when using the ``±HHMM[SS[.ffffff]]``
+    format.
 
-    :param str date_string: Date string.
-    :return: Datetime object.
+    To workaround this limitation, we literally strip the last
+    (first rightmost) colon using::
+
+        ''.join(now.rsplit(':', 1))
+
+    And that's enough to make :py:meth:`datetime.datetime.strptime()` to parse
+    ISO8601 with timezone dates correctly and is compatible with any Python
+    version 3.5 or higher.
+
+    :param str whenstr: ISO8601 with timezone datetime string.
+
+    :return: Datetime object with timezone.
+    :rtype: :py:class:`datetime.datetime`
     """
-    return datetime.strptime(date_string, ISO8601_FORMAT)
+    return datetime.strptime(''.join(whenstr.rsplit(':', 1)), ISO8601_FORMAT)
 
 
-def datetime_to_iso8601(date):
+def datetime_to_iso8601(whendt):
     """
-    Converts a datetime object to a date string of the format
-    YYYY:MM:DDTHH:MM:SS (ISO 8601).
+    Converts a datetime object to a date string of the ISO8601 with timezone.
 
-    This function is analogous to::
+    The format is of the form ``YYYY-MM-DDTHH:MM:SS.MS-TZ``, for example::
 
-        from datetime import datetime
-        datetime.now().replace(microsecond=0).isoformat()
+        2020-06-10T01:47:35.186550-06:00
 
-    :param datetime date: Datetime object.
-    :return: string with the date.
+    :param datetime whendt: Datetime object. *Any naive datetime object is
+     considered a local timezone datetime.* To correctly pass a UTC datetime
+     use::
+
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+
+    :return: A string with the datetime in the ISO8601 with timezone format.
+    :rtype: str
     """
-    return datetime.strftime(date, ISO8601_FORMAT)
+    # Any naive datetime is a local timezone datetime
+    if whendt.tzinfo is None:
+        whendt = whendt.astimezone(tz=None)
+    return whendt.isoformat()
 
 
 class DateTimeJSONEncoder(JSONEncoder):
@@ -74,7 +93,7 @@ class DateTimeJSONEncoder(JSONEncoder):
         return JSONEncoder.default(self, o)
 
 
-json_dumps = partial(dumps, cls=DateTimeJSONEncoder)
+dumps = partial(jsondumps, cls=DateTimeJSONEncoder)
 """
 A json.dumps compatible function that knows how to serialize datetime objects
 into ISO 8601 strings.
@@ -85,7 +104,7 @@ __all__ = [
     'iso8601_to_datetime',
     'datetime_to_iso8601',
     'DateTimeJSONEncoder',
-    'json_dumps',
+    'dumps',
 ]
 __api__ = [
     'iso8601_to_datetime',
