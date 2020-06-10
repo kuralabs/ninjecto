@@ -15,8 +15,8 @@ pyyaml
 # Core functionality  #
 #######################
 
-jinja2
-cerberus
+jinja2>=2.11
+inflection
 setuptools
 
 #######################
