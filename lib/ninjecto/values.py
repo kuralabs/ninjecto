@@ -90,6 +90,10 @@ def expand_dotdict(dotdict):
 
 def load_values(values_files, values):
     """
+    Get an unified data view of all values files and dot-notation values.
+
+    Merge is done right to left.
+
     :param list values_files: List of Path objects pointing to files with
      values for the rendering.
     :param OrderedDict values: Dictionary with keys in dot-notation and its

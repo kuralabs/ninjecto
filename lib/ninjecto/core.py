@@ -30,6 +30,12 @@ from jinja2 import (
     PrefixLoader,
     FileSystemLoader,
 )
+from jinja2 import (
+    Undefined,
+    ChainableUndefined,
+    DebugUndefined,
+    StrictUndefined,
+)
 
 from .utils.dictionary import Namespace
 
@@ -63,6 +69,13 @@ class Ninjecto:
         self._destination = destination
         self._filename = filename
 
+        self.undefmap = {
+            'Undefined': Undefined,
+            'ChainableUndefined': ChainableUndefined,
+            'DebugUndefined': DebugUndefined,
+            'StrictUndefined': StrictUndefined,
+        }
+
     def run(self, dry_run=False, override=False, levels=None):
 
         log.info('{} -> {}'.format(self._source, self._destination))
@@ -92,6 +105,16 @@ class Ninjecto:
         # First thing first, render the filename
         if filename is None:
             filename = self.render(src.name, src.name)
+
+            # The file rendered as empty, which usually implies a conditional
+            # file, so we stop the process
+            if not filename.strip():
+                log.warning(
+                    '"{}" file renders to nothing, skipping ...'.format(
+                        src.name
+                    )
+                )
+                return 0
 
         # Now with the name, we have an output
         dst = dstdir / filename
@@ -144,11 +167,16 @@ class Ninjecto:
         )
 
     def render(self, name, content):
+        # Optimization for empty files
+        if not content:
+            return ''
+
         config = self._config.ninjecto
 
         # Prepare environment
         envconf = dict(config.environment)
         envconf.update({
+            'undefined': self.undefmap[config.undefined.clss],
             'autoescape': select_autoescape(
                 **dict(config.autoescape),
             ),
@@ -167,17 +195,18 @@ class Ninjecto:
         })
         environment = Environment(**envconf)
 
+        # Make filters available
         for key, fltr in self._filters.items():
             environment.filters[key] = fltr
 
+        # Make namespaces and values available
+        for nskey, ns in self._namespaces.items():
+            environment.globals[nskey] = ns
+        environment.globals['values'] = self._values
+
         # Render template
         template = environment.get_template(name)
-        render = template.render(**{
-            **self._namespaces,
-            **{
-                'values': self._values,
-            }
-        })
+        render = template.render()
 
         return render
 
