@@ -120,7 +120,10 @@ class Namespace:
         super().__setattr__('_data', data)
 
     def __getattr__(self, attr):
-        return self[attr]
+        try:
+            return self[attr]
+        except KeyError as e:
+            raise AttributeError(e)
 
     def __setattr__(self, attr, value):
         self[attr] = value
