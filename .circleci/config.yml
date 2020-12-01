@@ -1,7 +1,14 @@
 version: 2.1
 
+workflows:
+  main:
+    jobs:
+      - build:
+          context:
+            - publication
+
 jobs:
-  run-tox:
+  build:
     environment:
       - PROJECT: ninjecto
     docker:
@@ -22,8 +29,3 @@ jobs:
             - run:
                 name: Publishing documentation
                 command: rsync -e "${PUBLISH_SSH_OPTIONS}" --recursive --verbose --human-readable --delete .tox/doc/tmp/html/ "${PUBLISH_DESTINATION}:docs/${PROJECT}"
-
-workflows:
-  main:
-    jobs:
-      - run-tox
