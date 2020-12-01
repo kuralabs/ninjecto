@@ -2,13 +2,26 @@ version: 2.1
 
 jobs:
   run-tox:
+    environment:
+      - PROJECT: ninjecto
     docker:
       - image: kuralabs/python3-dev:latest
+
     steps:
       - checkout
       - run:
+          name: Running tox
           command: tox --recreate
-          name: Running Tox
+      - when:
+          condition:
+            equal: [ master, << pipeline.git.branch >> ]
+          steps:
+            - add_ssh_keys:
+                fingerprints:
+                  - "b0:3b:d9:85:d0:1a:c2:ad:75:cf:08:b3:4a:1c:21:56"
+            - run:
+                name: Publishing documentation
+                command: rsync -e "${PUBLISH_SSH_OPTIONS}" --recursive --verbose --human-readable --delete .tox/doc/tmp/html/ "${PUBLISH_DESTINATION}:docs/${PROJECT}"
 
 workflows:
   main:
