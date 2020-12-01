@@ -4,8 +4,8 @@ Ninjecto - Ninja Injection Tool
 
 Template rendering and variable injection made easy.
 
-.. image:: https://build.kuralabs.io/buildStatus/icon?job=GitHub/ninjecto/master
-   :target: https://build.kuralabs.io/job/GitHub/job/ninjecto/job/master/
+.. image:: https://circleci.com/gh/kuralabs/ninjecto.svg?style=shield
+   :target: https://circleci.com/gh/kuralabs/ninjecto
    :alt: Build Status
 
 .. image:: https://img.shields.io/pypi/v/ninjecto
