@@ -34,6 +34,15 @@ Install
 Changelog
 =========
 
+0.5.0 (2021-07-21)
+------------------
+
+Fix
+~~~
+
+- Fixes namespaces. "env" and "git" namespaces are now available.
+
+
 0.4.0 (2020-10-06)
 ------------------
 
