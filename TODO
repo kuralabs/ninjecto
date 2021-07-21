@@ -1,6 +1,14 @@
 TODO
 ====
 
+Commands
+--------
+
+ninjecto render -> Default behavior, render a template
+
+ninjecto run
+ninjecto new
+
 Fixes
 -----
 

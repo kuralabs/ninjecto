@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2020 KuraLabs S.R.L
+# Copyright (C) 2017-2021 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ Core module.
 """
 
 from logging import getLogger
+from collections import OrderedDict
 
-from pprintpp import pformat
 from jinja2 import (
     select_autoescape,
     Environment,
@@ -44,6 +44,28 @@ log = getLogger(__name__)
 
 
 class Ninjecto:
+    """
+    Ninjecto Core Class.
+
+    Provides an API to render a directory tree, a single file, or arbitrary
+    content.
+
+    :param dict config: Configuration tree.
+     Use ``ninjecto.config.load_config`` to get a normalized data structure.
+    :param module local: Loaded ninjeconf.py Python module. Currently unused.
+    :param OrderedDict filters: Dictionary mapping the name of the filter and
+     the function implementing it.
+    :param OrderedDict namespaces: Dictionary mapping the name of the namespace
+     and the function implementing it.
+    :param list libraries: List of Paths to user libraries directories.
+    :param dict values: Arbitrary tree of values to pass to the templates.
+    :param Path source: Source filepath. Either a file or a directory.
+    :param Path destination: Destination filepath. Either a file or a
+     directory.
+    :param str filename: Override the destination filename.
+     Pass None to use the rendered name.
+    """
+
     def __init__(
         self,
         config,
@@ -60,7 +82,14 @@ class Ninjecto:
 
         self._local = local
         self._filters = filters
-        self._namespaces = namespaces
+
+        # Instance namespaces
+        self._namespaces = OrderedDict()
+        for nskey, ns in namespaces.items():
+            nsconf = getattr(
+                self._config.ninjecto.namespace, nskey, Namespace()
+            )
+            self._namespaces[nskey] = ns(nsconf)
 
         self._libraries = libraries
 
@@ -68,6 +97,10 @@ class Ninjecto:
         self._source = source
         self._destination = destination
         self._filename = filename
+
+        self._dry_run = False
+        self._override = False
+        self._levels = None
 
         self.undefmap = {
             'Undefined': Undefined,
@@ -77,24 +110,56 @@ class Ninjecto:
         }
 
     def run(self, dry_run=False, override=False, levels=None):
+        """
+        Execute the rendering of this Ninjecto context.
+
+        :param bool dry_run: Execute rendering without writing any file.
+        :param bool override: Override files if exit.
+        :param int levels: Maximum numbers of directories levels to recurse
+         into.
+
+        :return: Number of files processed.
+        :rtype: int
+        """
 
         log.info('{} -> {}'.format(self._source, self._destination))
         log.info('With:\n{}'.format(self._values))
 
-        log.info('Using filters:\n{}'.format(pformat(self._filters)))
-        log.info('Using namespaces:\n{}'.format(pformat(self._namespaces)))
+        log.info(
+            'Using filters: {}'.format(', '.join(self._filters.keys()))
+        )
+        log.info(
+            'Using namespaces: {}'.format(', '.join(self._namespaces.keys()))
+        )
 
         self._dry_run = dry_run
         self._override = override
         self._levels = levels
-        return self.process_file(
+        return self.process(
             self._source,
             self._destination,
             self._filename,
             self._levels,
         )
 
-    def process_file(self, src, dstdir, filename=None, levels=None):
+    def process(self, src, dstdir, filename=None, levels=None):
+        """
+        Process a path.
+
+        Path can be a single file, or a directory, in which case it will
+        recurse into it.
+
+        :param Path src: Path to the source file or directory.
+        :param Path disdir: Path to the destination directory.
+        :param str filename: Override the destination filename.
+         Pass None to use the rendered name.
+        :param int levels: Maximum numbers of directories levels to recurse
+         into.
+
+        :return: Number of files processed.
+        :rtype: int
+        """
+
         config = self._config.ninjecto
         dry_run = self._dry_run
         override = self._override
@@ -104,7 +169,11 @@ class Ninjecto:
 
         # First thing first, render the filename
         if filename is None:
-            filename = self.render(src.name, src.name)
+            filename = self.render(
+                src.name,
+                src.name,
+                filepath=src,
+            )
 
             # The file rendered as empty, which usually implies a conditional
             # file, so we stop the process
@@ -132,7 +201,8 @@ class Ninjecto:
         if src.is_file():
             content = self.render(
                 src.name,
-                src.read_text(encoding=config.input.encoding)
+                src.read_text(encoding=config.input.encoding),
+                filepath=src,
             )
             if not dry_run:
                 dst.write_text(
@@ -153,7 +223,7 @@ class Ninjecto:
             levels = None if levels is None else levels - 1
 
             for subfile in src.iterdir():
-                processed += self.process_file(
+                processed += self.process(
                     subfile, dst,
                     filename=None,
                     levels=levels,
@@ -166,7 +236,21 @@ class Ninjecto:
             'Don\'t know what to do.'.format(src)
         )
 
-    def render(self, name, content):
+    def render(self, name, content, filepath=None):
+        """
+        Render a template.
+
+        :param str name: Name of the template.
+         Used as key to fetch the template only.
+        :param str content: The content of the template itself.
+        :param Path filepath: Path to the template file, if any.
+         This is used to call namespaces that depend on the filepath.
+         Namespaces that require a filepath won't be called if unset.
+
+        :return: The rendered template.
+        :rtype: str
+        """
+
         # Optimization for empty files
         if not content:
             return ''
@@ -190,7 +274,7 @@ class Ninjecto:
                         encoding=config.filesystemloader.encoding,
                         followlinks=config.filesystemloader.followlinks,
                     ),
-                }),
+                }, delimiter=config.prefixloader.delimiter),
             ]),
         })
         environment = Environment(**envconf)
@@ -201,7 +285,11 @@ class Ninjecto:
 
         # Make namespaces and values available
         for nskey, ns in self._namespaces.items():
+            if callable(ns) and filepath:
+                environment.globals[nskey] = ns(filepath)
+                continue
             environment.globals[nskey] = ns
+
         environment.globals['values'] = self._values
 
         # Render template

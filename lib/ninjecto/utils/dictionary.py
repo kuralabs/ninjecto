@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2021 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@
 Dictionary and namespaces related utilities.
 """
 
+from copy import deepcopy
 from logging import getLogger
-from collections import Mapping
+from collections.abc import Mapping
 
 try:
     from pprintpp import pformat
@@ -64,7 +65,6 @@ class Namespace:
 
     .. code-block:: python3
 
-        >>> from metrica.namespace import Namespace
         >>> ns = Namespace(
         ...     {'one': 100},
         ...     {'two': 300},
@@ -174,6 +174,10 @@ class Namespace:
             for key, value in to_update.items()
         )
         super().__setattr__('_data', data)
+
+    def copy(self):
+        data = super().__getattribute__('_data')
+        return Namespace(deepcopy(data))
 
 
 __all__ = [

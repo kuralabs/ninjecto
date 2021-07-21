@@ -32,4 +32,10 @@ ninjecto:
     default: false
 
   undefined:
-    clss: 'Undefined'
+    clss: 'StrictUndefined'
+
+  namespace:
+    env:
+        safe: true
+    git:
+        submodules: false

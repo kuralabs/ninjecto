@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2021 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ Namespace plugin to access git context.
 """
 
 from logging import getLogger
-from collections import namedtuple
+from traceback import format_exc
 
 from ...utils.git import (
     GitNotFound,
@@ -35,20 +35,24 @@ from ...utils.git import (
     find_body,
     find_date,
 )
+from ...utils.dictionary import Namespace
 
 
 log = getLogger(__name__)
 
 
-def namespace_git(config, filepath):
+def namespace_git(config):
     """
-    Fetch information relative to the git context where the file input file is
-    located.
+    Fetch information relative to the git context.
+
+    This function will fetch the git information only once per root directory
+    unless the config function ``ninjecto.namespace.git.submodules`` is set to
+    True, in which case the information will be called for every directory.
 
     :param dict config: Plugin configuration, if any.
-    :param Path filepath: Path file been rendered.
 
-    :return: A named tuple with information from git context.
+    :return: A dynamic namespace function that returns an object with
+     information from the git context of the file input it is called with.
 
      Values available:
 
@@ -62,40 +66,91 @@ def namespace_git(config, filepath):
      - ``body``: commit message body of current revision.
      - ``date``: commit date in strict ISO 8601 format.
 
-    :rtype: namedtuple
+    :rtype: function
     """
 
-    parent = str(filepath.parent)
-    context = {}
+    root = None
+    cache = None
 
-    # Try to determine git namespace
-    properties = {
-        'tag': find_tag,
-        'root': find_root,
-        'branch': find_branch,
-        'revision': find_revision,
-        'name': find_name,
-        'email': find_email,
-        'subject': find_subject,
-        'body': find_body,
-        'date': find_date,
-    }
-    for prop, finder in properties.items():
-        value = None
+    def namespace(filepath):
+        """
+        Git dynamic namespace.
+
+        :param Path filepath: Path file been rendered.
+
+        :return: An object with information from the git context of the file
+         input it is called with.
+        :rtype: Namespace
+        """
+        nonlocal root
+        nonlocal cache
+
+        # Only consider directories
+        if not filepath.is_dir():
+            filepath = filepath.parent
+
+        # If the root isn't set, set it
+        if root is None:
+            root = filepath
+
+        # If the filepath is the same as the root, return the cache if
+        # available. This is particularly useful for all files inside the
+        # same directory
+        if cache is not None and filepath == root:
+            return cache
+
+        # Check if the directory is a subdirectory of the root
+        # If not, reset the root and clear the cache
         try:
-            value = finder(directory=parent)
-        except GitError:
-            log.exception('Failed fetching git {} property'.format(prop))
-        except GitNotFound:
-            pass
-        context[prop] = value
+            filepath.relative_to(root)
+        except ValueError:
+            root = filepath
+            cache = None
 
-    # Create git namespace object
-    git_type = namedtuple('git', list(properties))
-    git = git_type(**context)
+        # If the submodule option is not enabled, return the cache if
+        # available. In case the current directory is not a subpath of the
+        # root, the cache was cleared and then this shouldn't execute.
+        if cache is not None and not config.submodules:
+            return cache
 
-    log.debug('git namespace: {}'.format(git))
-    return git
+        context = {}
+
+        # Try to determine git namespace
+        properties = {
+            'tag': find_tag,
+            'root': find_root,
+            'branch': find_branch,
+            'revision': find_revision,
+            'name': find_name,
+            'email': find_email,
+            'subject': find_subject,
+            'body': find_body,
+            'date': find_date,
+        }
+        for prop, finder in properties.items():
+            value = None
+            try:
+                value = finder(directory=str(filepath))
+            except GitError:
+                log.debug(
+                    'Failed fetching git {} property:\n{}'.format(
+                        prop, format_exc(),
+                    )
+                )
+            except GitNotFound:
+                pass
+            context[prop] = value
+
+        # Create git namespace object
+        git = Namespace(context)
+        log.debug('git namespace: ({})'.format(
+            ', '.join(sorted(context))
+        ))
+
+        cache = git
+        return git
+
+    return namespace
 
 
 __all__ = [
