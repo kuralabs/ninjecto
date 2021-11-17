@@ -301,7 +301,9 @@ setup(
     install_requires=find_requirements('requirements.txt'),
 
     # Optional dependencies
-    extras_require={},
+    extras_require={
+        'vault': ['hvac'],
+    },
 
     # Data files
     package_data={
@@ -362,6 +364,7 @@ setup(
         'ninjecto_plugins_namespaces_1_0': [
             'env = ninjecto.plugins.namespaces.env:namespace_env',
             'git = ninjecto.plugins.namespaces.git:namespace_git',
+            'vault = ninjecto.plugins.namespaces.vault:namespace_vault',
         ],
     },
 
