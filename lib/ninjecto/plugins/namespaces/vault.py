@@ -15,43 +15,97 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from os import environ
+"""
+Namespace plugin to access secrets in a Vault instance.
+"""
 
-from hvac import Client
+from os import environ
+from logging import getLogger
 
 from ...utils.dictionary import Namespace
+
+
+log = getLogger(__name__)
 
 
 def namespace_vault(config):
     """
     Fetch values stored on a Vault service.
 
-    Vault is a service used to manage secrets and protect sensitive data. Check
-    more information at https://www.vaultproject.io/
+    Vault is a service used to manage secrets and protect sensitive data.
+    Check more information at https://www.vaultproject.io/
+
+    To use this namespace add a configuration for your Vault instance of the
+    form:
+
+    .. code-block: toml
+
+        [ninjecto.namespace.vault.configurations.myvault]
+        url='https://myvault.domain.com/'
+        token_env='NINJECTO_MYVAULT_TOKEN'
+
+    Then, in the templates, use the namespace as::
+
+        {{ vault.myvault.myengine.mysecret.mykey }}
+
 
     :param dict config: Plugin configuration, if any.
 
     :return: A dynamic namespace to access a secret on any level of a Vault
-    service.
+     service.
+    :rtype: Namespace
     """
-    return Namespace({
-        config: Vault(
-            token=environ.get(connection_data.pop('token_env')),
-            **connection_data
+
+    if not hasattr(config, 'configurations'):
+        log.info('Vault plugin has no configurations. Skipping setup.')
+        return Namespace({})
+
+    try:
+        from hvac import Client
+    except ImportError as e:
+        log.critical(
+            'Unable to import the Vault client. '
+            'The package "hvac" is missing. '
+            'Install ninjecto with the "vault" option as follows: '
+            'pip3 install ninjecto[vault]'
         )
-        for config, connection_data in config.configurations
-    })
+        raise e
+
+    configs = {}
+
+    for confname, options in config.configurations:
+
+        log.info(f'Loading Vault configuration {confname!r} ...')
+        for option in ['url', 'token_env']:
+            assert option in options, (
+                f'{option!r} is missing in Vault configuration {confname!r}'
+            )
+
+        token = environ.get(options.pop('token_env'))
+        if token is None:
+            log.warning(
+                'Environment variable {token_env!r} required by Vault '
+                'configuration {confname!r} is UNSET!'
+            )
+
+        configs[confname] = Vault(
+            confname,
+            Client(token=token, **options)
+        )
+
+    return Namespace(configs)
 
 
 class VaultKV2:
     """
-    Vault accessor for kv_v2 engines
+    Vault accessor for kv_v2 engines.
 
-    :param vault_client: Client connected to a vault instance.
+    :param client: Client connected to a Vault instance.
     :param mount_point: Name of the engine on the vault instance.
     """
-    def __init__(self, vault_client, mount_point):
-        self._vault = vault_client
+
+    def __init__(self, client, mount_point):
+        self._client = client
         self._mount_point = mount_point
         self._secrets = {}
 
@@ -64,12 +118,12 @@ class VaultKV2:
     def __getitem__(self, path):
 
         # The path is cached because of the "spatial locality" principle
-        # it is probable that if one key/value is accesed the others will also
+        # it is probable that if one key/value is accessed the others will also
         # be requested, and since the vault call brings all key/values under
         # a path, we might as well store them
         if path not in self._secrets:
             self._secrets[path] = Namespace(
-                self._vault.secrets.kv.v2.read_secret(
+                self._client.secrets.kv.v2.read_secret(
                     path,
                     mount_point=self._mount_point
                 )['data']['data']
@@ -80,23 +134,20 @@ class VaultKV2:
 
 class Vault:
     """
-    High level vault accessor holding instances of vault engines.
+    High level Vault accessor holding and client instance.
 
-    :param url: Vault instance address.
-    :param token: Access token for vault.
-    :param engine_type: One of the support vault engines.
+    :param str name: Name of the Vault configuration.
+    :param client: Client connected to a Vault instance.
     """
 
     VAULT_ENGINES = {
-        'kv_v2': VaultKV2
+        'kv_2': VaultKV2,
     }
 
-    def __init__(self, url, token, engine_type='kv_v2'):
-        if engine_type not in self.VAULT_ENGINES:
-            raise Exception(f'Invalid or unsupported engine {engine_type}')
-
-        self._vault = Client(url=url, token=token)
-        self._engine_class = self.VAULT_ENGINES[engine_type]
+    def __init__(self, name, client):
+        self._name = name
+        self._client = client
+        self._mounted = None
         self._engines = {}
 
     def __getattr__(self, attr):
@@ -106,10 +157,46 @@ class Vault:
             raise AttributeError(e)
 
     def __getitem__(self, engine_name):
+
+        # Fetch list of mounted engines
+        if self._mounted is None:
+            log.info(
+                'Loading mounted secrets engines for Vault configuration '
+                f'{self._name!r} ...'
+            )
+            self._mounted = \
+                self._client.sys.list_mounted_secrets_engines()['data']
+
+        # Fetch cached instance of the engine class
         if engine_name not in self._engines:
-            self._engines[engine_name] = self._engine_class(
-                self._vault,
-                engine_name
+            path = f'{engine_name}/'
+
+            # Check the mount exists
+            if path not in self._mounted:
+                raise RuntimeError(
+                    f'Unknown mounted secret engine {engine_name!r}'
+                )
+            mountconf = self._mounted[path]
+
+            # Determine engine type
+            type_ = mountconf['type']
+            if type_ == 'kv':
+                version = mountconf['options']['version']
+                type_ = f'{type_}_{version}'
+
+            # Check engine is supported
+            if type_ not in self.VAULT_ENGINES:
+                supported = ', '.join(sorted(self.VAULT_ENGINES.keys()))
+                raise RuntimeError(
+                    f'Mount {engine_name!r} is an unsupported engine '
+                    f'type {type_!r}. Supported engines are: {supported}.'
+                )
+
+            # Instance engine class
+            engine_class = self.VAULT_ENGINES[type_]
+            self._engines[engine_name] = engine_class(
+                self._client,
+                engine_name,
             )
 
         return self._engines[engine_name]
