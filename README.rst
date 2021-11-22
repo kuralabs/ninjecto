@@ -34,6 +34,16 @@ Install
 Changelog
 =========
 
+0.6.0 (2021-11-22)
+------------------
+
+New
+~~~
+
+- New namespace "vault" that allows to fetch secrets from a HashiCorp's Vault
+  instance.
+
+
 0.5.0 (2021-07-21)
 ------------------
 
