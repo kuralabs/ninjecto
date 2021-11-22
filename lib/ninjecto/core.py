@@ -122,8 +122,9 @@ class Ninjecto:
         :rtype: int
         """
 
-        log.info('{} -> {}'.format(self._source, self._destination))
-        log.info('With:\n{}'.format(self._values))
+        log.info('Render {} -> {}'.format(self._source, self._destination))
+        if self._values:
+            log.info('With values:\n{}'.format(self._values))
 
         log.info(
             'Using filters: {}'.format(', '.join(self._filters.keys()))

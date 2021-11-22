@@ -41,8 +41,8 @@ def namespace_vault(config):
     .. code-block: toml
 
         [ninjecto.namespace.vault.configurations.myvault]
-        url='https://myvault.domain.com/'
-        token_env='NINJECTO_MYVAULT_TOKEN'
+        url = 'https://myvault.domain.com/'
+        token_env = 'NINJECTO_MYVAULT_TOKEN'
 
     Then, in the templates, use the namespace as::
 
@@ -72,6 +72,13 @@ def namespace_vault(config):
         raise e
 
     configs = {}
+
+    log.info('Found Vault configurations: {}'.format(
+        ', '.join(
+            repr(confname)
+            for confname, options
+            in config.configurations)
+    ))
 
     for confname, options in config.configurations:
 
@@ -141,7 +148,7 @@ class Vault:
     """
 
     VAULT_ENGINES = {
-        'kv_2': VaultKV2,
+        'kv_v2': VaultKV2,
     }
 
     def __init__(self, name, client):
@@ -182,7 +189,7 @@ class Vault:
             type_ = mountconf['type']
             if type_ == 'kv':
                 version = mountconf['options']['version']
-                type_ = f'{type_}_{version}'
+                type_ = f'{type_}_v{version}'
 
             # Check engine is supported
             if type_ not in self.VAULT_ENGINES:
