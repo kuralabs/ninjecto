@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020 KuraLabs S.R.L
+# Copyright (C) 2020-2022 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 Filter to add quotes to text.
 """
 
-from jinja2.filters import environmentfilter
+from jinja2 import pass_environment
 
 
-@environmentfilter
+@pass_environment
 def filter_quote(environment, text, quote='"', escape_with='\\', newline=None):
     """
     Filter to add quotes to text.

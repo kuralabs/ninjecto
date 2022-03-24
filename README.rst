@@ -34,14 +34,24 @@ Install
 Changelog
 =========
 
+0.7.0 (2022-03-24)
+------------------
+
+Changes
+~~~~~~~
+
+- New version compatible with Jinja2 3.1.0.
+
+
 0.6.1 (2022-03-24)
 ------------------
 
-New
-~~~
+Changes
+~~~~~~~
 
-- New version pinning Jinja2 to an older version to avoid breakeage for API
-  changes. Use this version if you need to use Jinja2 < 3.1.0.
+- New version pinning Jinja2 to an older version to avoid breakage caused by
+  API changes. Use this version if you need to use Jinja2 < 3.1.0.
+
 
 0.6.0 (2021-11-22)
 ------------------
