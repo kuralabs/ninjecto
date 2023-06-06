@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2019 KuraLabs S.R.L
+# Copyright (C) 2019-2023 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@
 Values loading and merging module.
 """
 
+from sys import stdin
 from logging import getLogger
 
 from pprintpp import pformat
 
-from .inputs import load_files
 from .utils.dictionary import update
+from .inputs import load_files, load_content
 
 
 log = getLogger(__name__)
@@ -88,16 +89,19 @@ def expand_dotdict(dotdict):
     return result
 
 
-def load_values(values_files, values):
+def load_values(values_files, values, values_in):
     """
-    Get an unified data view of all values files and dot-notation values.
+    Get an unified data view of all values files, dot-notation values and
+    standard input (if any).
 
-    Merge is done right to left.
+    Merge is done left to right. That is, last to load will override last.
 
     :param list values_files: List of Path objects pointing to files with
      values for the rendering.
     :param OrderedDict values: Dictionary with keys in dot-notation and its
      associated values.
+    :param str values_in: Read standard input using the given format. If None,
+     then ignore standard input.
 
     :return: Normalized values loaded from all files and overrode with the
      values dictionary, if any.
@@ -115,6 +119,15 @@ def load_values(values_files, values):
             'Expanded dot-notation dictionary:\n{}'.format(pformat(expanded))
         )
         update(bundle, expanded)
+
+    if values_in:
+        piped = load_content(stdin.read(), values_in)
+
+        if piped:
+            log.debug(
+                'Parsed standard input:\n{}'.format(pformat(piped))
+            )
+            update(bundle, piped)
 
     if bundle:
         log.debug(

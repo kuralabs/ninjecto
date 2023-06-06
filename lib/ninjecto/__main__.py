@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2023 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ def main():
     # Load values
     if args.values_files:
         log.info('Loading values files ...')
-    values = load_values(args.values_files, args.values)
+    values = load_values(args.values_files, args.values, args.values_in)
 
     # Load config
     if args.configs:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2020 KuraLabs S.R.L
+# Copyright (C) 2017-2023 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ from logging import getLogger
 
 from pkg_resources import resource_filename
 
-from .inputs import load_file, load_files
 from .utils.git import find_root, GitError
+from .inputs import SUPPORTED_FORMATS, load_files
 
 
 log = getLogger(__name__)
@@ -70,32 +70,32 @@ def load_config(configs):
             resource_filename(__package__, 'data/config.yaml')
         ),
         *(
-            Path('/etc/ninjecto/config{}'.format(frmt))
-            for frmt in load_file.supported_formats
+            Path('/etc/ninjecto/config.{}'.format(frmt))
+            for frmt in SUPPORTED_FORMATS
         ),
         *(
             Path(environ.get(
                 'XDG_CONFIG_HOME',
                 Path.home() / '.config',
-            )) / 'ninjecto' / 'config{}'.format(frmt)
-            for frmt in load_file.supported_formats
+            )) / 'ninjecto' / 'config.{}'.format(frmt)
+            for frmt in SUPPORTED_FORMATS
         ),
         *(
-            Path.home() / '.ninjerc{}'.format(frmt)
-            for frmt in load_file.supported_formats
+            Path.home() / '.ninjerc.{}'.format(frmt)
+            for frmt in SUPPORTED_FORMATS
         ),
         *(
             tuple() if gitroot is None
             else (
-                gitroot / '.ninjerc{}'.format(frmt)
-                for frmt in load_file.supported_formats
+                gitroot / '.ninjerc.{}'.format(frmt)
+                for frmt in SUPPORTED_FORMATS
             )
         ),
         *(
             tuple() if gitroot is not None and gitroot == Path.cwd()
             else (
-                Path.cwd() / '.ninjerc{}'.format(frmt)
-                for frmt in load_file.supported_formats
+                Path.cwd() / '.ninjerc.{}'.format(frmt)
+                for frmt in SUPPORTED_FORMATS
             )
         ),
         *configs,

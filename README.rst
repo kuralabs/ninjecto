@@ -34,6 +34,16 @@ Install
 Changelog
 =========
 
+0.8.0 (2023-06-06)
+------------------
+
+New
+~~~
+
+- Adds --values-in=[toml,yaml,json] to parse the standard input and allow to
+  pass values as a pipe.
+
+
 0.7.0 (2022-03-24)
 ------------------
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2023 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,43 +29,63 @@ from .utils.dictionary import update
 log = getLogger(__name__)
 
 
-def load_json(path):
+def load_json(content):
     """
-    Load a file in JSON format.
+    Load a string in JSON format.
 
-    :param Path path: Path to the JSON file.
+    :param str content: String in JSON format.
 
     :return: A dictionary with the parsed content.
     :rtype: dict
     """
     from ujson import loads
-    return loads(path.read_text(encoding='utf-8'))
+    return loads(content)
 
 
-def load_toml(path):
+def load_toml(content):
     """
-    Load a file in TOML format.
+    Load a string in TOML format.
 
-    :param Path path: Path to the TOML file.
+    :param str content: String in TOML format.
 
     :return: A dictionary with the parsed content.
     :rtype: dict
     """
     from toml import loads
-    return loads(path.read_text(encoding='utf-8'))
+    return loads(content)
 
 
-def load_yaml(path):
+def load_yaml(content):
     """
-    Load a file in YAML format.
+    Load a string in YAML format.
 
-    :param Path path: Path to the YAML file.
+    :param str content: String in YAML format.
 
     :return: A dictionary with the parsed content.
     :rtype: dict
     """
     from yaml import load, FullLoader
-    return load(path.read_text(encoding='utf-8'), Loader=FullLoader)
+    return load(content, Loader=FullLoader)
+
+
+SUPPORTED_FORMATS = {
+    'toml': load_toml,
+    'json': load_json,
+    'yaml': load_yaml,
+}
+
+
+def load_content(content, frmt):
+    """
+    Load content in any supported file format.
+
+    :param str content: String any supported file format.
+    :param str frmt: The file format to parse the content for.
+
+    :return: A dictionary with the parsed content.
+    :rtype: dict
+    """
+    return SUPPORTED_FORMATS[frmt](content)
 
 
 def load_file(path):
@@ -77,26 +97,19 @@ def load_file(path):
     :return: A dictionary with the parsed content.
     :rtype: dict
     """
-    extension = path.suffix
-    if extension not in load_file.supported_formats:
+    frmt = path.suffix.replace('.', '', 1)
+    if frmt not in SUPPORTED_FORMATS:
         raise RuntimeError(
             'Unknown file format "{}" for file {}. '
-            'Supported formats are :{}.'.format(
-                extension, path,
-                ', '.join(sorted(load_file.supported_formats.keys())),
+            'Supported formats are: {}.'.format(
+                frmt, path,
+                ', '.join(sorted(SUPPORTED_FORMATS.keys())),
             )
         )
 
     # Load file
-    content = load_file.supported_formats[extension](path)
+    content = load_content(path.read_text(encoding='utf-8'), frmt)
     return content
-
-
-load_file.supported_formats = {
-    '.toml': load_toml,
-    '.json': load_json,
-    '.yaml': load_yaml,
-}
 
 
 def load_files(paths):
@@ -140,6 +153,8 @@ def load_files(paths):
 
 
 __all__ = [
+    'SUPPORTED_FORMATS',
+    'load_content',
     'load_file',
     'load_files',
 ]

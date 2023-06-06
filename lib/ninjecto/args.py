@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017-2020 KuraLabs S.R.L
+# Copyright (C) 2017-2023 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -339,6 +339,14 @@ def parse_args(argv=None):
         help=(
             'One or more paths to files with values to render inputs with. '
             'Must be a .toml, .yaml or .json'
+        ),
+    )
+    parser.add_argument(
+        '-s', '--values-in',
+        choices=['toml', 'yaml', 'json'],
+        default=None,
+        help=(
+            'Read values from the standard input in the given format'
         ),
     )
 
