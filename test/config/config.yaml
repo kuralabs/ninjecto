@@ -1,0 +1,41 @@
+ninjecto:
+  input:
+    encoding: "utf-8"
+
+  output:
+    encoding: "utf-8"
+
+  filesystemloader:
+    encoding: "utf-8"
+    followlinks: false
+
+  prefixloader:
+    delimiter: "/"
+
+  environment:
+    block_start_string: "{%"
+    block_end_string: "%}"
+    variable_start_string: "{{"
+    variable_end_string: "}}"
+    comment_start_string: "{#"
+    comment_end_string: "#}"
+    line_statement_prefix: null
+    line_comment_prefix: null
+    trim_blocks: false
+    lstrip_blocks: false
+    keep_trailing_newline: true
+
+  autoescape:
+    enabled_extensions: ["html", "htm", "xml"]
+    disabled_extensions: []
+    default_for_string: true
+    default: false
+
+  undefined:
+    clss: 'StrictUndefined'
+
+  namespace:
+    env:
+        safe: true
+    git:
+        submodules: false
