@@ -1,0 +1,1 @@
+helm: "{{ .Values.{[ values.location ]}.values }}"
