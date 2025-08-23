@@ -54,7 +54,7 @@ def register(key):
         from ninjecto.plugins import namespaces
 
         @namespaces.register('my_namespace')
-        def my_namespace(config, root):
+        def my_namespace(config):
             return {'hello': 'world'}
     """
     return NamespacesLoader.register(key)
