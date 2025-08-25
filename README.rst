@@ -30,7 +30,7 @@ custom filters and environment-aware namespaces.
 
 .. contents::
    :local:
-   :depth: 3
+   :depth: 2
 
 
 Key Features
@@ -600,7 +600,7 @@ Then, configure the Vault connection in your configuration file:
 
 Or using TOML:
 
-.. code-block: toml
+.. code-block:: toml
 
         [ninjecto.namespace.vault.configurations.myvault]
         url = "https://myvault.domain.com/"
