@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ninjecto"
+description = "Ninja Injection Tool. Template rendering and variable injection made easy."
+dynamic = ["version"]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "KuraLabs S.R.L", email = "info@kuralabs.io"}
+]
+keywords = ["ninjecto"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.8"
+dependencies = [
+    # Input formats
+    "toml",
+    "ujson",
+    "pyyaml",
+
+    # Core functionality
+    "jinja2>=3.1.0",
+    "inflection",
+    "packagedata",
+
+    # Utilities
+    "colorlog",
+    "pprintpp",
+    "setproctitle",
+]
+
+[project.optional-dependencies]
+vault = ["hvac"]
+
+[project.urls]
+Homepage = "https://github.com/kuralabs/ninjecto"
+
+[project.scripts]
+ninjecto = "ninjecto.__main__:main"
+
+[project.entry-points."ninjecto_plugins_filters_1_0"]
+
+# Built-in filters
+comment = "ninjecto.plugins.filters.comment:filter_comment"
+quote = "ninjecto.plugins.filters.quote:filter_quote"
+read = "ninjecto.plugins.filters.read:filter_read"
+
+# Support for inflection functions
+camelize = "inflection:camelize"
+dasherize = "inflection:dasherize"
+humanize = "inflection:humanize"
+ordinal = "inflection:ordinal"
+ordinalize = "inflection:ordinalize"
+parameterize = "inflection:parameterize"
+pluralize = "inflection:pluralize"
+singularize = "inflection:singularize"
+tableize = "inflection:tableize"
+titleize = "inflection:titleize"
+transliterate = "inflection:transliterate"
+underscore = "inflection:underscore"
+
+[project.entry-points."ninjecto_plugins_namespaces_1_0"]
+env = "ninjecto.plugins.namespaces.env:namespace_env"
+git = "ninjecto.plugins.namespaces.git:namespace_git"
+vault = "ninjecto.plugins.namespaces.vault:namespace_vault"
+
+[tool.setuptools.dynamic]
+version = {attr = "ninjecto.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["lib"]
+
+[tool.setuptools.package-data]
+ninjecto = ["data/*"]

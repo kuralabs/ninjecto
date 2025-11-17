@@ -1,4 +1,4 @@
-.. image:: doc/ninjecto.png
+.. image:: https://github.com/kuralabs/ninjecto/blob/6f58c7ece71a4e9fcb534582f97fb931babecb67/doc/ninjecto.png
    :alt: Ninjecto - Ninja Injection Tool
    :width: 300px
    :align: center
@@ -85,17 +85,17 @@ Quick Start
 Installation
 ------------
 
-Install ninjecto using pip:
+Install ninjecto using your package manager, for example for uv:
 
 .. code-block:: bash
 
-   pip install ninjecto
+   uv tool install ninjecto
 
 For HashiCorp Vault support:
 
 .. code-block:: bash
 
-   pip install ninjecto[vault]
+   uv tool install ninjecto[vault]
 
 Basic Usage
 -----------
