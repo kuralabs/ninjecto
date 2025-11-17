@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright (C) 2017-2023 KuraLabs S.R.L
+# Copyright (C) 2017-2025 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +21,7 @@ from os import environ
 from pathlib import Path
 from logging import getLogger
 
-from pkg_resources import resource_filename
+import packagedata as pkgdata
 
 from .utils.git import find_root, GitError
 from .inputs import SUPPORTED_FORMATS, load_files
@@ -65,64 +63,68 @@ def load_config(configs):
     except GitError:
         gitroot = None
 
-    files = [
-        Path(
-            resource_filename(__package__, 'data/config.yaml')
-        ),
-        *(
-            Path('/etc/ninjecto/config.{}'.format(frmt))
-            for frmt in SUPPORTED_FORMATS
-        ),
-        *(
-            Path(environ.get(
-                'XDG_CONFIG_HOME',
-                Path.home() / '.config',
-            )) / 'ninjecto' / 'config.{}'.format(frmt)
-            for frmt in SUPPORTED_FORMATS
-        ),
-        *(
-            Path.home() / '.ninjerc.{}'.format(frmt)
-            for frmt in SUPPORTED_FORMATS
-        ),
-        *(
-            tuple() if gitroot is None
-            else (
-                gitroot / '.ninjerc.{}'.format(frmt)
+    with pkgdata.as_path(__package__, 'data/config.yaml') as pkgconfig:
+
+        files = [
+            pkgconfig,
+            *(
+                Path('/etc/ninjecto/config.{}'.format(frmt))
                 for frmt in SUPPORTED_FORMATS
-            )
-        ),
-        *(
-            tuple() if gitroot is not None and gitroot == Path.cwd()
-            else (
-                Path.cwd() / '.ninjerc.{}'.format(frmt)
+            ),
+            *(
+                Path(environ.get(
+                    'XDG_CONFIG_HOME',
+                    Path.home() / '.config',
+                )) / 'ninjecto' / 'config.{}'.format(frmt)
                 for frmt in SUPPORTED_FORMATS
+            ),
+            *(
+                Path.home() / '.ninjerc.{}'.format(frmt)
+                for frmt in SUPPORTED_FORMATS
+            ),
+            *(
+                tuple() if gitroot is None
+                else (
+                    gitroot / '.ninjerc.{}'.format(frmt)
+                    for frmt in SUPPORTED_FORMATS
+                )
+            ),
+            *(
+                tuple() if gitroot is not None and gitroot == Path.cwd()
+                else (
+                    Path.cwd() / '.ninjerc.{}'.format(frmt)
+                    for frmt in SUPPORTED_FORMATS
+                )
+            ),
+            *configs,
+        ]
+
+        log.debug('Configuration files:')
+        valid = []
+
+        for file in files:
+            if not file.exists():
+                log.debug(
+                    '{} doesn\'t exists ...'.format(file)
+                )
+                continue
+
+            if file.is_file():
+                log.debug(
+                    '{} exists as is going to be loaded ...'.format(file)
+                )
+                valid.append(file)
+                continue
+
+            log.warning(
+                'Configuration file {} exists but is not a regular file. '
+                'Ignoring ...'.format(file)
             )
-        ),
-        *configs,
-    ]
 
-    log.debug('Configuration files:')
-    valid = []
-
-    for file in files:
-        if not file.exists():
-            log.debug('{} doesn\'t exists ...'.format(file))
-            continue
-
-        if file.is_file():
-            log.debug('{} exists as is going to be loaded ...'.format(file))
-            valid.append(file)
-            continue
-
-        log.warning(
-            'Configuration file {} exists but is not a regular file. '
-            'Ignoring ...'.format(file)
-        )
-
-    # FIXME: Maybe avoid breaking a system if the non-explicitly given
-    #        configuration files are broken?
-    log.debug('Loading configuration:')
-    return load_files(valid)
+        # FIXME: Maybe avoid breaking a system if the non-explicitly given
+        #        configuration files are broken?
+        log.debug('Loading configuration:')
+        return load_files(valid)
 
 
 __all__ = [

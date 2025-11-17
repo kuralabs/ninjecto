@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#
-# Copyright (C) 2017-2020 KuraLabs S.R.L
+# Copyright (C) 2017-2025 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -321,17 +319,18 @@ setup(
         'Template rendering and variable injection made easy.'
     ),
     long_description=read('README.rst'),
+    long_description_content_type='text/x-rst',
     url='https://docs.kuralabs.io/ninjecto/',
     keywords='ninjecto',
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 3',
     ],
+    license='Apache-2.0',
 
     # Sphinx autodoc cannot extract the documentation of zipped eggs with the
     # ``.. autodata::`` directive, causing chaos in AutoAPI. This disables zip

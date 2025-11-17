@@ -1,12 +1,7 @@
-.. raw:: html
-
-   <p align="center">
-     <img
-       src="doc/ninjecto.png"
-       alt="Ninjecto - Ninja Injection Tool"
-       width="300px"
-     >
-   </p>
+.. image:: doc/ninjecto.png
+   :alt: Ninjecto - Ninja Injection Tool
+   :width: 300px
+   :align: center
 
 ========
 Ninjecto
@@ -151,19 +146,19 @@ Values and Configuration
 
 Values are provided through multiple sources with a clear hierarchy:
 
-1. Command-line values (``-a key.subkey=value``)
-2. Values files (``-u values.yaml``)
-3. Standard input (``--values-in yaml``)
+#. Command-line values (``-a key.subkey=value``)
+#. Values files (``-u values.yaml``)
+#. Standard input (``--values-in yaml``)
 
 Configuration follows a hierarchical loading system:
 
-1. Package default configuration
-2. System configuration (``/etc/ninjecto/config.*``)
-3. User configuration (``$XDG_CONFIG_HOME/ninjecto/config.*``)
-4. User alternative configuration (``$HOME/.ninjerc.*``)
-5. Project configuration (``<gitroot>/.ninjerc.*``)
-6. Local configuration (``$PWD/.ninjerc.*``)
-7. Explicit configuration files (``-c config.yaml``)
+#. Package default configuration
+#. System configuration (``/etc/ninjecto/config.*``)
+#. User configuration (``$XDG_CONFIG_HOME/ninjecto/config.*``)
+#. User alternative configuration (``$HOME/.ninjerc.*``)
+#. Project configuration (``<gitroot>/.ninjerc.*``)
+#. Local configuration (``$PWD/.ninjerc.*``)
+#. Explicit configuration files (``-c config.yaml``)
 
 Namespaces
 ----------
@@ -200,14 +195,14 @@ You may implement as many filters as you need using the plugin system.
 Ninjecto includes several powerful built-in filters:
 
 **Text Processing:**
-  - ``comment``: Add language-specific comments
-  - ``quote``: Add quotes with proper escaping
-  - ``read``: Read content from external files
+- ``comment``: Add language-specific comments
+- ``quote``: Add quotes with proper escaping
+- ``read``: Read content from external files
 
 **String Transformation (via Inflection package):**
-  - ``camelize``, ``dasherize``, ``humanize``
-  - ``pluralize``, ``singularize``
-  - ``underscore``, ``titleize``
+- ``camelize``, ``dasherize``, ``humanize``
+- ``pluralize``, ``singularize``
+- ``underscore``, ``titleize``
 
 Libraries
 ---------
@@ -602,9 +597,9 @@ Or using TOML:
 
 .. code-block:: toml
 
-        [ninjecto.namespace.vault.configurations.myvault]
-        url = "https://myvault.domain.com/"
-        token_env = "NINJECTO_MYVAULT_TOKEN"
+   [ninjecto.namespace.vault.configurations.myvault]
+   url = "https://myvault.domain.com/"
+   token_env = "NINJECTO_MYVAULT_TOKEN"
 
 This configuration layout allows to define multiple Vault configurations,
 each with its own URL and token environment variable. Set the environment
@@ -652,27 +647,37 @@ Core Options
 ------------
 
 **Input/Output:**
-  - ``-o, --output``: Write to specific output file/directory
-  - ``-i, --output-in``: Write files inside output directory
-  - ``-f, --force``: Override existing files
-  - ``-d, --dry-run``: Preview without writing files
+
+- ``-o, --output``: Write to specific output file/directory
+- ``-i, --output-in``: Write files inside output directory
+- ``-f, --force``: Override existing files
+- ``-d, --dry-run``: Preview without writing files
 
 **Values:**
-  - ``-a, --values KEY=VALUE``: Inline key-value pairs. Multiple allowed.
-    KEY supports dot notation for nested values, for example:
-    ``-a database.host=localhost -a database.port=5432``
-  - ``-u, --values-file FILE``: Load values from file. Supports yaml/json/toml.
-    Multiple files allowed; later files override earlier ones.
-  - ``-s, --values-in FORMAT``: Read values from stdin (yaml/json/toml)
+
+- ``-a, --values KEY1=VALUE1 KEY2=VALUE2``: Inline key-value pairs.
+  Multiple allowed.
+
+  KEY supports dot notation for nested values, for example:
+  ``-a database.host=localhost -a database.port=5432``
+
+  VALUE support strings, integers, float, booleans and ISO 8601 datetimes.
+  See ``ninjecto.utils.types.autocast`` for more details.
+- ``-u, --values-file FILE``: Load values from file. Supports yaml/json/toml.
+  Multiple files allowed; data is merged from left to right, with later files
+  overriding earlier ones.
+- ``-s, --values-in FORMAT``: Read values from stdin (yaml/json/toml)
 
 **Configuration:**
-  - ``-c, --config FILE``: Additional configuration files
-  - ``-l, --library DIR``: Template library directories
+
+- ``-c, --config FILE``: Additional configuration files
+- ``-l, --library DIR``: Template library directories
 
 **Control:**
-  - ``-r, --levels N``: Limit directory recursion depth
-  - ``-p, --parents``: Create parent directories
-  - ``-v, --verbose``: Increase verbosity
+
+- ``-r, --levels N``: Limit directory recursion depth
+- ``-p, --parents``: Create parent directories
+- ``-v, --verbose``: Increase verbosity
 
 Examples
 --------
@@ -697,6 +702,15 @@ Examples
 
 Changelog
 =========
+
+1.0.0 (2025-11-17)
+------------------
+
+Change
+~~~~~~
+
+- Removes deprecated pkg_resources package.
+
 
 0.8.0 (2023-06-06)
 ------------------
@@ -784,7 +798,8 @@ New
 Fix
 ~~~
 
-  - Values and namespaces are now available globally, in particular inside macros in libraries.
+- Values and namespaces are now available globally, in particular inside macros
+  in libraries.
 
 
 0.2.1 (2020-02-04)

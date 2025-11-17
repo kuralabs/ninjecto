@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright (C) 2017-2019 KuraLabs S.R.L
+# Copyright (C) 2017-2025 KuraLabs S.R.L
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +21,7 @@ from copy import copy
 from logging import getLogger
 from collections import OrderedDict
 
-from pkg_resources import iter_entry_points
+import packagedata as pkgdata
 
 
 log = getLogger(__name__)
@@ -126,7 +124,7 @@ class FunctionLoader(object):
         # Iterate over entry points
         log.debug('Loading entrypoint {}'.format(self.entrypoint))
 
-        for ep in iter_entry_points(group=self.entrypoint):
+        for ep in pkgdata.entry_points(self.entrypoint):
 
             name = ep.name
 

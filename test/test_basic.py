@@ -119,7 +119,6 @@ def test_config():
     output_path.unlink(missing_ok=True)
 
 
-
 def test_nested():
 
     """
