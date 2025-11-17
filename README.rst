@@ -703,6 +703,15 @@ Examples
 Changelog
 =========
 
+1.1.0 (2025-11-17)
+------------------
+
+Change
+~~~~~~
+
+- Removes setup.py in favor of pyproject.toml.
+
+
 1.0.0 (2025-11-17)
 ------------------
 
@@ -710,6 +719,7 @@ Change
 ~~~~~~
 
 - Removes deprecated pkg_resources package.
+- Updates build system to use uv.
 
 
 0.8.0 (2023-06-06)
