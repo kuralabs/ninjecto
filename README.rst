@@ -1,4 +1,4 @@
-.. image:: https://github.com/kuralabs/ninjecto/blob/6f58c7ece71a4e9fcb534582f97fb931babecb67/doc/ninjecto.png
+.. image:: https://github.com/kuralabs/ninjecto/blob/6f58c7ece71a4e9fcb534582f97fb931babecb67/doc/ninjecto.png?raw=true
    :alt: Ninjecto - Ninja Injection Tool
    :width: 300px
    :align: center
