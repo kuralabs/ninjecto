@@ -137,9 +137,13 @@ Templates
 
 Ninjecto uses Jinja2 templating engine with additional filters and namespaces.
 Templates can be single files or entire directory structures that get processed
-recursively. You may even use conditionals in filenames or directory names to
-control which files are rendered, based on values or environment context.
-This enables dynamic file generation and flexible project scaffolding.
+recursively.
+
+You may use Jinja2 expressions in filenames and directory names, both
+conditional expressions (``{% if %}``) to control whether a file is
+created, and variable expressions (``{{ }}``) to dynamically set the output
+name based on values or environment context. This enables dynamic file
+generation and flexible project scaffolding.
 
 Values and Configuration
 ------------------------
@@ -279,6 +283,51 @@ Conditional File Creation
    $ ls
    {% if values.docker %}.dockerignore{% endif %}
    {% if values.docker %}Dockerfile{% endif %}
+
+Dynamic File Names
+------------------
+
+File and directory names can also contain Jinja2 variable expressions
+(``{{ }}``) to generate output paths dynamically based on values. When
+Ninjecto processes a file or directory whose name contains a template
+expression, the expression is evaluated and the result becomes the actual
+name in the output.
+
+For example, a template file named ``{{ values.ingress.domain }}.conf``
+will produce an output file named after the value of ``values.ingress.domain``:
+
+.. code-block:: text
+
+   templates/
+   └── nginx/
+       └── {{ values.ingress.domain }}.conf   ← filename is a template
+
+With a values file such as:
+
+.. code-block:: yaml
+
+   # values.yaml
+   ingress:
+     domain: "myapp.example.com"
+
+Running:
+
+.. code-block:: bash
+
+   ninjecto -u values.yaml templates/ output/
+
+Produces:
+
+.. code-block:: text
+
+   output/
+   └── nginx/
+       └── myapp.example.com.conf             ← filename rendered from value
+
+This works for both file names and directory names, and can be combined
+with conditional expressions in the same path component. It is particularly
+useful for generating per-environment or per-service configuration files
+without maintaining separate template files for each case.
 
 
 Plugin System
